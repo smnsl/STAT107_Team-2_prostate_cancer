@@ -5,11 +5,154 @@ date: "2025-11-03"
 output: pdf_document
 ---
 
-## Read Data
+
+## Data reading
 
 ```{r}
 
 data <- read.csv("00_ProstateCancer_Data.csv", header=T)
+head(data)
 str(data)
+summary(data)
+
+```
+
+
+
+## Data handling: Turning all character variables to factors
+
+```{r}
+
+source("01_Functions.R")
+data <- to_factors(data)
+str(data)
+
+```
+
+
+
+## Dataset Variables
+
+
+### Initial Diagnosis
+
+
+**Hasta_ID (Discrete)**: Patient ID
+
+
+**Yas (Discrete)**: Age
+
+
+**Tani_Tarihi (Date)**:	Diagnosis Date
+
+
+**PSA_Tani (Continuous)**: Serum Prostate-Specific Antigen (PSA) level at diagnosis (ng/mL)
+
+
+**Klinik_Evre	(Ordinal/Categorical)**: Clinical cT-Stage determined by pre-treatment examinations (cT1c < cT2a < cT2b < cT2c < cT3a < cT3b for increasing extent of tumor invasion)
+
+
+**Biyopsi_Gleason	(Ordinal/Categorical)**: Biopsy Gleason Score (3+3 < 3+4 < 4+3 < 3+5 < 4+4 < 4+5 < 5+4 < 5+5, higher score indicates higher aggressiveness)
+
+
+**Risk_Grubu (Ordinal/Categorical)**: Risk Group Classification (1 for Low, 2 for Intermediate, 3 forHigh)	
+
+
+### Risk Factors
+
+
+**Albumin	(Continuous)**: ASerum albumin level (g/dL). Indicator of nutritional status and systemic health
+
+
+**Lenfosit (Discrete)**: Lymphocyte (Immune system component) Count
+
+
+**CRP (Continuous)**: C-Reactive Protein (mg/L). Indicator of inflammation
+
+
+**NLR	(Continuous)**: Neutrophil-to-Lymphocyte Ratio. A prognostic indicator for systemic inflammation and cancer aggressiveness.
+
+
+**CALLY_Index	(Continuous)**: CALLY Index. A composite index, likely related to inflammation or blood components.
+
+
+**Komorbidite_Skor (Ordinal/Categorical)**: Comorbidity Score indicating the severity of other co-existing chronic diseases ( 0 (No comorbidities) < ... < 5 (Severe comorbidities))
+
+
+### Treatment Information
+
+
+**Tedavi_Tipi	(Categorical)**: Main Treatment Type received (1 for Radical Prostatectomy, 2 for Radiotherapy/RT, 3 for Active Surveillance, 4 for Combination Therapy)
+
+
+**Tedavi_Tarihi	(Date)**: Treatment Date
+
+
+**RT_Dozu (Continuous)**: Total Radiation Dose (in Gy), if radiotherapy was performed
+
+
+**ADT_Tipi (Categorical)**:Androgen Deprivation Therapy (ADT, hormone therapy) Type used
+
+
+**ADT_Suresi (Continuous)**: ADT(hormone therapy) Duration
+
+
+### Pathological Markers
+
+
+**Patolojik_Evre (Ordinal/Categorical)**: Final Tumor Pathological Stage determined after surgery on the removed tissue (pT2a < pT2b < pT2c < pT3a < pT3b < pT4, NaN indicates patient did not undergo surgery)
+
+
+**Cerrahi_Sinir	(Binary/Categorical)**: Surgical Margin Status indicating if cancer cells were present at the edge of the removed tissue. Crucial for recurrence prediction (0: Negative, 1: Positive, NaN indicates patient did not undergo surgery). 
+
+
+**Final_Gleason	(Ordinal/Categorical)**: Final Gleason Score confirmed from the final excised tissue (3+3 < 3+4 < 4+3 < 3+5 < 4+4 < 4+5 < 5+4 < 5+5, higher score indicates higher aggressiveness)
+
+
+### Follow-up & Outcomes
+
+
+**PSA_Nadir	(Continuous)**: The lowest PSA level reached after treatment (ng/mL). A lower nadir generally indicates better treatment success
+
+
+**PSA_Takip_3ay / 6ay / 12ay (Continuous)**: Follow-up PSA levels (ng/mL) measured at at 3/6/12 Months
+
+
+**BCR_Durum (Binary/Categorical)**: Biochemical Recurrence (BCR) Status	whether the PSA level rise above a recurrence threshold? (True for Recurrence occurred, False for no Recurrence occurred)
+
+
+**BCR_Tarihi (Date)**: Date when biochemical recurrence was confirmed
+
+
+**Metastaz_Durum (Binary/Categorical)**: Metastasis Status whether distant metastasis occur during follow-up? (0 for No, 1 for Yes)
+
+
+**Metastaz_Tarihi	(Date)**: Date when metastasis was confirmed
+
+
+**Son_Durum	(Binary/Categorical)**: Patient's Survival Status at the last follow-up (0 for Alive, 1 for Deceased)
+
+
+**Son_Takip_Tarihi (Date)**: Date of the last recorded patient information.
+
+
+
+## Data Visualization
+
+```{r}
+
+sum(is.na(data$BCR_Durum))
+table(data$BCR_Durum)
+prop.table(table(data$BCR_Durum))
+
+frequencies <- table(data$BCR_Durum)
+barplot(
+    frequencies,
+    main = "Frequency of Biochemical Recurrence Status (BCR_Durum)",
+    xlab = "Recurrence Status",
+    ylab = "Number of Patients",
+    col = c("blue", "red"),
+    ylim = c(0, max(frequencies) * 1.1)
+    )
 
 ```
