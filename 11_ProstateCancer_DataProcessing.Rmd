@@ -247,7 +247,7 @@ boxplot(data[["PSA_Nadir"]],
 
 
 
-## Data Visualization 5: Summary & Boxplots of Risk Factors
+## Data Visualization 5: Summary & Boxplots, Barplot of Risk Factors
 
 ```{r}
 
@@ -259,7 +259,7 @@ summary(data[, risk_factors])
 continuous_risks <- c("Albumin", "CRP", "NLR", "CALLY_Index")
 plot_colors <- rainbow(4)
 
-par(mfrow = c(1, 4))
+par(mfrow = c(2,3))
 
 for (i in 1:length(continuous_risks)) {
   var_name <- continuous_risks[i]
@@ -270,6 +270,16 @@ for (i in 1:length(continuous_risks)) {
           ylab = var_name,
           col = plot_colors[i])
 }
+
+frequencies <- table(data$Komorbidite_Skor)
+barplot(
+    frequencies,
+    main = "Frequency of Comorbidity Score (Komorbidite_Skor)",
+    xlab = "Comorbidity Score",
+    ylab = "Number of Patients",
+    col = rainbow(6),
+    ylim = c(0, max(frequencies) * 1.1)
+    )
 
 ```
 
