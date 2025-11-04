@@ -259,7 +259,7 @@ summary(data[, risk_factors])
 continuous_risks <- c("Albumin", "CRP", "NLR", "CALLY_Index")
 plot_colors <- rainbow(4)
 
-par(mfrow = c(2,3))
+par(mfrow = c(1,4))
 
 for (i in 1:length(continuous_risks)) {
   var_name <- continuous_risks[i]
@@ -270,6 +270,8 @@ for (i in 1:length(continuous_risks)) {
           ylab = var_name,
           col = plot_colors[i])
 }
+
+par(mfrow = c(1,1))
 
 frequencies <- table(data$Komorbidite_Skor)
 barplot(
