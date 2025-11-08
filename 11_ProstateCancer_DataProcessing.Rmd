@@ -246,6 +246,8 @@ boxplot(data[["PSA_Nadir"]],
 ```
 
 
+The PSA level significantly decreased after treatment.
+
 
 ## Data Visualization 5: Summary & Boxplots, Barplot of Risk Factors
 
