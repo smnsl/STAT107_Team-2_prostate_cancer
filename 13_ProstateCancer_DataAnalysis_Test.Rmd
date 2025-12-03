@@ -1,0 +1,255 @@
+---
+title: "Data Processing"
+author: "Team 2"
+date: "2025-11-03"
+output: pdf_document
+---
+
+
+## Data reading
+
+```{r}
+
+data <- read.csv("00_ProstateCancer_Data.csv", header=T)
+head(data)
+str(data)
+summary(data)
+
+```
+
+
+
+## Dataset Variables
+
+
+### Initial Diagnosis
+
+
+**Hasta_ID (Categorical)**: Patient ID
+
+
+**Yas (Discrete)**: Age
+
+
+**Tani_Tarihi (Date)**:	Diagnosis Date
+
+
+**PSA_Tani (Continuous)**: Serum Prostate-Specific Antigen (PSA) level at diagnosis (ng/mL)
+
+
+**Klinik_Evre	(Ordinal/Categorical)**: Clinical cT-Stage determined by pre-treatment examinations (cT1c < cT2a < cT2b < cT2c < cT3a < cT3b for increasing extent of tumor invasion)
+
+
+**Biyopsi_Gleason	(Ordinal/Categorical)**: Biopsy Gleason Score (3+3 < 3+4 < 4+3 < 3+5 < 4+4 < 4+5 < 5+4 < 5+5, higher score indicates higher aggressiveness)
+
+
+**Risk_Grubu (Ordinal/Categorical)**: Risk Group Classification (1 for Low, 2 for Intermediate, 3 forHigh)	
+
+
+### Risk Factors
+
+
+**Albumin	(Continuous)**: ASerum albumin level (g/dL). Indicator of nutritional status and systemic health
+
+
+**Lenfosit (Discrete)**: Lymphocyte (Immune system component) Count
+
+
+**CRP (Continuous)**: C-Reactive Protein (mg/L). Indicator of inflammation
+
+
+**NLR	(Continuous)**: Neutrophil-to-Lymphocyte Ratio. A prognostic indicator for systemic inflammation and cancer aggressiveness.
+
+
+**CALLY_Index	(Continuous)**: CALLY Index. A composite index, likely related to inflammation or blood components.
+
+
+**Komorbidite_Skor (Ordinal/Categorical)**: Comorbidity Score indicating the severity of other co-existing chronic diseases ( 0 (No comorbidities) < ... < 5 (Severe comorbidities))
+
+
+### Treatment Information
+
+
+**Tedavi_Tipi	(Categorical)**: Main Treatment Type received (1 for Radical Prostatectomy, 2 for Radiotherapy/RT, 3 for Hormone Therapy, 4 for Combination of Radiotherapy and Hormone Therapy)
+
+
+**Tedavi_Tarihi	(Date)**: Treatment Date
+
+
+**RT_Dozu (Continuous)**: Total Radiation Dose (in Gy), if radiotherapy was performed
+
+
+**ADT_Tipi (Categorical)**: Androgen Deprivation Therapy (ADT, hormone therapy) Type used
+
+
+**ADT_Suresi (Continuous)**: ADT(hormone therapy) Duration
+
+
+### Pathological Markers
+
+
+**Patolojik_Evre (Ordinal/Categorical)**: Final Tumor Pathological Stage determined after surgery on the removed tissue (pT2a < pT2b < pT2c < pT3a < pT3b < pT4, NaN indicates patient did not undergo surgery)
+
+
+**Cerrahi_Sinir	(Binary/Categorical)**: Surgical Margin Status indicating if cancer cells were present at the edge of the removed tissue. Crucial for recurrence prediction (0: Negative, 1: Positive, NaN indicates patient did not undergo surgery). 
+
+
+**Final_Gleason	(Ordinal/Categorical)**: Final Gleason Score confirmed from the final excised tissue (3+3 < 3+4 < 4+3 < 3+5 < 4+4 < 4+5 < 5+4 < 5+5, higher score indicates higher aggressiveness)
+
+
+### Follow-up & Outcomes
+
+
+**PSA_Nadir	(Continuous)**: The lowest PSA level reached after treatment (ng/mL). A lower nadir generally indicates better treatment success
+
+
+**PSA_Takip_3ay / 6ay / 12ay (Continuous)**: Follow-up PSA levels (ng/mL) measured at at 3/6/12 Months
+
+
+**BCR_Durum (Binary/Categorical)**: Biochemical Recurrence (BCR) Status	whether the PSA level rise above a recurrence threshold? (True for Recurrence occurred, False for no Recurrence occurred)
+
+
+**BCR_Tarihi (Date)**: Date when biochemical recurrence was confirmed
+
+
+**Metastaz_Durum (Binary/Categorical)**: Metastasis Status whether distant metastasis occur during follow-up? (0 for No, 1 for Yes)
+
+
+**Metastaz_Tarihi	(Date)**: Date when metastasis was confirmed
+
+
+**Son_Durum	(Binary/Categorical)**: Patient's Survival Status at the last follow-up (0 for Alive, 1 for Deceased)
+
+
+**Son_Takip_Tarihi (Date)**: Date of the last recorded patient information.
+
+
+
+## Data handling 1: Remove variables that we will not use for analysis
+
+```{r}
+
+cols1 <- c("Tani_Tarihi", "Tedavi_Tarihi", "PSA_Takip_3ay", "PSA_Takip_6ay", "PSA_Takip_12ay", "BCR_Tarihi", "Metastaz_Tarihi", "Son_Takip_Tarihi")
+
+data <- data[, !(names(data) %in% cols1)]
+
+```
+
+
+
+## Data handling 2: Turning all categorical variables to factors
+
+```{r}
+
+cols2 <- c("Klinik_Evre", "Biyopsi_Gleason", "Risk_Grubu", "Komorbidite_Skor", "Tedavi_Tipi", "ADT_Tipi", "Patolojik_Evre", "Cerrahi_Sinir", "Final_Gleason", "BCR_Durum", "Metastaz_Durum", "Son_Durum")
+
+data[cols2] <- lapply(data[cols2], as.factor)
+
+```
+
+
+
+## Data handling 3: Changing variable names
+
+```{r}
+
+names(data) <- c("Patient ID", "Age", "PSA_before", "CTstage", "GleasonScore_before", "RiskClass", "Albumin", "Lymphocyte", "CRP", "NLR", "CallyIndex", "ComorbidityScore", "Treatment", "RadiationDose", "HormoneType", "HormonDuration" ,"TumorSize", "MarginStatus", "GleasonScore_after", "PSA_after", "BCR", "Metastasis", "Survival")
+
+```
+
+```{r}
+
+str(data)
+
+```
+
+
+
+## Data Analysis 1: Chi-squared Test, Treatment vs BCR
+
+### Hypotheses
+
+H0: Treatment Type and Biochemical Recurrence (BCR) Status are independent. (The recurrence rate is the same across all treatment groups)
+
+Ha: Treatment Type and Biochemical Recurrence (BCR) Status are not independent. (The recurrence rate is significantly different for at least one treatment group)
+
+```{r}
+
+bcr_table <- table(data$Treatment, data$BCR)
+cat("Frequency Table (Counts):\n")
+print(bcr_table)
+
+bcr_test <- chisq.test(bcr_table)
+cat("\nChi-squared Test Results:\n")
+print(bcr_test)
+
+cat("\nBCR Rate (%) within each Treatment Group:\n")
+round(prop.table(bcr_table, margin = 1) * 100, 1)
+
+```
+
+**Conclusion**: Since the p-value (0.0294) is less than the significance level (a=0.05), we reject the null hypothesis (H0).
+
+**Interpretation**: There is a statistically significant association between the type of treatment a patient receives and the likelihood of experiencing Biochemical Recurrence (BCR).
+
+Highest Recurrence Rate: Treatment Type 3 (Hormone Therapy (ADT) Monotherapy) showed the highest biochemical recurrence rate at 43.7%.
+
+Lowest Recurrence Rate: Treatment Type 1 (Radical Prostatectomy) showed the lowest recurrence rate at 25.6%.
+
+
+## Data Analysis 2: Chi-squared Test, Treatment vs Survival
+
+### Hypotheses
+
+H0: Treatment Type and Survival Status are independent. (The survival rate is the same across all treatment groups)
+
+Ha: Treatment Type and Survival Status are not independent. (The survival rate is significantly different for at least one treatment group)
+
+```{r}
+
+survival_table <- table(data$Treatment, data$Survival)
+cat("Frequency Table (Counts):\n")
+print(survival_table)
+
+survival_test <- chisq.test(survival_table)
+cat("\nChi-squared Test Results:\n")
+print(survival_test)
+
+cat("\nSurvival Rate (%) within each Treatment Group (Survival = Alive):\n")
+round(prop.table(survival_table, margin = 1) * 100, 1)
+
+```
+
+**Conclusion**: Since the p-value (0.2034) is greater than the significance level (a=0.05), we fail to reject the null hypothesis (H0).
+
+**Interpretation**: There is no statistically significant association between the type of treatment a patient receives and the likelihood of their Survival Status (Alive vs Deceased).
+
+
+## Data Analysis 3: ANOVA Test, Treatment vs PSA Difference
+
+### Hypotheses
+
+H0: The mean change in PSA (Delta PSA) is the same across all four Treatment Type groups
+
+Ha: The mean change in PSA (Delta PSA) is significantly different for at least one treatment group
+
+```{r}
+
+data$Delta_PSA <- data$PSA_before - data$PSA_after
+
+anova_result <- aov(Delta_PSA ~ Treatment, data = data)
+summary(anova_result)
+
+TukeyHSD(anova_result)
+
+```
+
+**Conclusion**: Since the p-value (2.66e-06) is less than the significance level (a=0.05), we reject the null hypothesis (H0).
+
+**Interpretation**: Interpretation: There is a statistically significant difference in the mean change in PSA (Delta PSA) among the different treatment groups.
+
+**Tukey's HSD Interpretation**: The mean PSA change (Delta PSA, where a larger value indicates a greater reduction) in the Radical Prostatectomy (Treatment 1) group is significantly smaller than the mean change in all other treatment groups (2, 3, and 4).
+
+Largest Mean Difference: Treatment 3 (Hormone Therapy Monotherapy) showed the largest positive mean difference (Delta PSA = 29.755) compared to Treatment 1, indicating the greatest average PSA reduction after treatment.
+
+No Significant Difference: There is no significant difference in the mean PSA Defference among the three non-surgical groups (Treatment 2, 3, and 4).
