@@ -18,10 +18,11 @@ output: pdf_document
 
 
 ## Data:
-  The dataset we are using for this analysis is retrieved from the Zendo repository (https://zenodo.org/records/15007105), titled “Comprehensive Clinical, Pathological and Follow-up Dataset of Prostate Cancer Patients.” It was collected and published by Mert Başaranoğlu at Mersin Üniversitesi Hastanesi (Mersin University Hospital), in southern Turkey. There are a lot of variables and numbers that we can collect through this data set since it includes 600 observations of individual prostate cancer patients' records. Overall, the dataset contains 30 variables related to clinical parameters, including patient demographics, diagnostic and treatment information, pathological outcomes, and follow-up data. There are a few steps that we’ve used to clean the data. These are elaborated in this order: identify which variables we’re going to use in this project, delete unnecessary information (columns) afterward, convert all categorical variables into factor form, changing unnoticeable name to English (since it’s a data from other country), addressing missing variable and visualizing each of them in various form. Our data will not be generalized through a randomized simulation. 
-
+  The data used for this analysis were retrieved from the Zenodo repository, a well-known open-access repository mainly used by science communities. A dataset we're using, titled “Comprehensive Clinical, Pathological and Follow-up Dataset of Prostate Cancer Patients,” was collected and published by Mert Başaranoğlu at Mersin Üniversitesi Hastanesi (Mersin University Hospital) in southern Turkey. It contains detailed information on factors related to Prostate Cancer, including 30 variables spanning four broader categories: Clinical Parameters, Treatment Information, Pathological Outcomes, and Follow-up Data. Some variables include: Hasta_ID, Yas, Tani_Tarihi, PSA_Tani, Klinik_Evre, and Biyopsi_Gleason	Risk_Grubu.
 
 ## Dataset Variables:
+
+To make data sets more consistent, we then decided to delete unnecessary information by removing the corresponding columns. Afterward, converting all categorical variables into factor type was required to ensure that our program, R(Studio), correctly interprets them as discrete categories rather than as continuous values or even strings. Moreover, this foreign data set has named its critical variables in another language that we need to rename in English. Lastly, addressing missing variables and visualizing were involved in each of them in various forms.
 
 
 ### Initial Diagnosis
