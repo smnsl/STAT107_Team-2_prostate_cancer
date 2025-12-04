@@ -8,6 +8,11 @@ output: pdf_document
 
 Treatment Effectiveness in Patients with Prostate Cancer 
 
+```{r setup, include=FALSE}
+library(knitr)
+library(kableExtra)
+```
+
 \begin{center}
 
 **Abstract**
@@ -60,7 +65,10 @@ table_initial <- data.frame(
   Type_of_Data = colC
 )
 
-kable(table_initial, caption = "Initial Diagnosis Variables")
+table_initial %>%
+  kable(caption = "Table 1: Initial Diagnosis Variables", booktabs = TRUE) %>%
+  kable_styling(latex_options = "hold_position") %>%
+  column_spec(2, width = "6cm")
 
 ```
 
@@ -96,7 +104,10 @@ table_risk <- data.frame(
   Type_of_Data = colC
 )
 
-kable(table_risk, caption = "Risk Factors")
+table_risk %>% 
+  kable(caption = "Table 2: Risk Factors", booktabs = TRUE) %>%
+  kable_styling(latex_options = "hold_position") %>%
+  column_spec(2, width = "6cm")
 
 ```
 
@@ -135,6 +146,12 @@ table_info <- data.frame(
 
 kable(table_info, caption = "Treatment Information")
 
+
+table_info %>%
+  kable(caption = "Treatment Information", booktabs = TRUE) %>%
+  kable_styling(latex_options = "hold_position") %>% 
+  column_spec(2, width = "5cm")
+
 ```
 
 ```{r, echo=FALSE}
@@ -162,7 +179,10 @@ table_marker <- data.frame(
   Type_of_Data = colC
 )
 
-kable(table_marker, caption = "Pathological Markers")
+table_marker %>%
+  kable(caption = "Table 4: Pathological Markers", booktabs = TRUE) %>%
+  kable_styling(latex_options = "hold_position") %>%
+  column_spec(2, width = "6cm") 
 
 ```
 
@@ -208,16 +228,148 @@ table_marker <- data.frame(
   Type_of_Data = colC
 )
 
-kable(table_marker, caption = "Follow-up & Outcomes")
+table_marker %>% 
+  kable(caption = "Table 5: Follow-up \\& Outcomes", booktabs = TRUE) %>%
+  kable_styling(latex_options = "hold_position") %>%
+  column_spec(2, width = "7cm")
 
 ```
 
-### Data Cleaning
+### 2-2) Data Cleaning
 To make data sets more consistent, we then decided to delete unnecessary information by removing the corresponding columns. Afterward, converting all categorical variables into factor type was required to ensure that our program, R(Studio), correctly interprets them as discrete categories rather than as continuous values or even strings. Moreover, this foreign data set has named its critical variables in another language that we need to rename in English. Lastly, addressing missing variables and visualizing were involved in each of them in various forms.
+
+```{r, echo=FALSE}
+
+data <- read.csv("00_ProstateCancer_Data.csv", header=T)
+
+cols1 <- c("Tani_Tarihi", "Tedavi_Tarihi", "PSA_Takip_3ay", "PSA_Takip_6ay", "PSA_Takip_12ay", "BCR_Tarihi", "Metastaz_Tarihi", "Son_Takip_Tarihi")
+data <- data[, !(names(data) %in% cols1)]
+
+cols2 <- c("Klinik_Evre", "Biyopsi_Gleason", "Risk_Grubu", "Komorbidite_Skor", "Tedavi_Tipi", "ADT_Tipi", "Patolojik_Evre", "Cerrahi_Sinir", "Final_Gleason", "BCR_Durum", "Metastaz_Durum", "Son_Durum")
+data[cols2] <- lapply(data[cols2], as.factor)
+
+names(data) <- c("Patient ID", "Age", "PSA_before", "CTstage", "GleasonScore_before", "RiskClass", "Albumin", "Lymphocyte", "CRP", "NLR", "CallyIndex", "ComorbidityScore", "Treatment", "RadiationDose", "HormoneType", "HormonDuration" ,"TumorSize", "MarginStatus", "GleasonScore_after", "PSA_after", "BCR", "Metastasis", "Survival")
+
+```
 
 
 ### Visualization:
-  The preliminary visualizations and numerical summaries are crucial for preparing and interpreting the three multivariate logistic regression models, as this step is essential for diagnosing data quality, identifying confounding factors, and assessing the signal strength before the formal statistical analysis begins. We’ve established a few bar graphs on the frequency of treatment type, frequency of biochemical recurrence status, survival status, and risk factors. The box plots on PSA level at diagnosis and after treatment will be used to directly confound our numerical data among different treatment groups, as well as interpreting information from risk factors through our numerical summary. We will not use any scatter plot in this model, but we are preparing and interpreting the three multivariate logistic regression modes.
+  The preliminary visualizations and numerical summaries are crucial for preparing and interpreting the three multivariate logistic regression models, as this step is essential for diagnosing data quality, identifying confounding factors, and assessing the signal strength before the formal statistical analysis begins.
+  
+  
+```{r}
+
+sum(is.na(data$Treatment))
+
+table(data$Treatment)
+round(prop.table(table(data$Treatment)), 3)
+
+frequencies <- table(data$Treatment)
+barplot(
+    frequencies,
+    main = "Frequency of Treatment Type (Treatment)",
+    xlab = "Treatment Type",
+    ylab = "Number of Patients",
+    col = rainbow(4),
+    ylim = c(0, max(frequencies) * 1.1)
+    )
+
+```
+```{r}
+
+sum(is.na(data$BCR))
+
+table(data$BCR)
+round(prop.table(table(data$BCR)), 3)
+
+frequencies <- table(data$BCR)
+barplot(
+    frequencies,
+    main = "Frequency of Biochemical Recurrence Status",
+    xlab = "Recurrence Status",
+    ylab = "Number of Patients",
+    col = c("blue", "red"),
+    ylim = c(0, max(frequencies) * 1.1)
+    )
+
+```
+  
+```{r}
+
+sum(is.na(data$Survival))
+
+table(data$Survival)
+round(prop.table(table(data$Survival)), 3)
+
+frequencies <- table(data$Survival)
+barplot(
+    frequencies,
+    main = "Frequency of Survival Status",
+    xlab = "Survival Status",
+    ylab = "Number of Patients",
+    col = c("blue", "red"),
+    ylim = c(0, max(frequencies) * 1.1)
+    )
+
+```
+  
+```{r}
+
+PSA <- c("PSA_before", "PSA_after")
+sapply(data[, PSA], function(x) sum(is.na(x)))
+
+summary(data[, PSA])
+
+par(mfrow = c(1, 2))
+
+boxplot(data[["PSA_before"]],
+          main = "Box Plot of PSA level at diagnosis",
+          col = "grey")
+
+boxplot(data[["PSA_after"]],
+          main = "Box Plot of PSA level after treatment",
+          col = "green")
+
+```
+  
+```{r}
+
+risk_factors <- c("Albumin", "Lymphocyte", "CRP", "NLR", "CallyIndex", "ComorbidityScore")
+sapply(data[, risk_factors], function(x) sum(is.na(x)))
+
+summary(data[, risk_factors])
+
+continuous_risks <- c("Albumin", "CRP", "NLR", "CallyIndex")
+plot_colors <- rainbow(4)
+
+par(mfrow = c(1,4))
+
+for (i in 1:length(continuous_risks)) {
+  var_name <- continuous_risks[i]
+  var_data <- data[[var_name]]
+  
+  boxplot(var_data,
+          main = paste("Box Plot of", var_name),
+          ylab = var_name,
+          col = plot_colors[i])
+}
+
+par(mfrow = c(1,1))
+
+frequencies <- table(data$ComorbidityScore)
+barplot(
+    frequencies,
+    main = "Frequency of Comorbidity Score (ComorbidityScore)",
+    xlab = "Comorbidity Score",
+    ylab = "Number of Patients",
+    col = rainbow(6),
+    ylim = c(0, max(frequencies) * 1.1)
+    )
+
+```
+
+  
+  We’ve established a few bar graphs on the frequency of treatment type, frequency of biochemical recurrence status, survival status, and risk factors. The box plots on PSA level at diagnosis and after treatment will be used to directly confound our numerical data among different treatment groups, as well as interpreting information from risk factors through our numerical summary. We will not use any scatter plot in this model, but we are preparing and interpreting the three multivariate logistic regression modes.
 
 
 ### Analysis aims:
