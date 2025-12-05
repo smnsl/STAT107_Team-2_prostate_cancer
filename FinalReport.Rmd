@@ -353,7 +353,7 @@ Figure 3: Comparison of PSA level before and after treatment on Diagnosis
 Figure 3 displays the distributions and central tendencies of Prostate-Specific Antigen (PSA) levels at the time of diagnosis and after primary treatment. The box plots and numerical summaries illustrate a significant and positive effect of the treatment modalities on reducing PSA levels in the cohort. Before treatment (PSA_before), the median PSA level was 59.35 ng/mL, with values ranging up to 150.00 ng/mL. Following treatment (PSA_after), the median level dropped dramatically to just 0.1900 ng/mL, with most values lying significantly below the pre-treatment range. This substantial decrease in both the median and quartiles (as evidenced by the significant drop from the 1st Quartile of 18.10 to 0.0400 indicates that the treatments were immediately successful in reducing the primary tumor burden and systemic PSA activity in the majority of patients. This observation aligns with clinical expectations, in which successful treatment should drive PSA levels to near-undetectable levels (nadir).
 
 
-### 4) Analysis aims:
+### 4) Analysis 
 
 ## PART A) TEST
   
@@ -412,7 +412,6 @@ cat(paste0("Chi-squared = ", round(bcr_test$statistic, 4), ", df = ", bcr_test$p
 The Chi-squared test yielded a test statistic of chi^2 = 8.9915 with a corresponding p-value of 0.0294. Since the p-value is less than the significance level (alpha (a) = 0.05), we reject the null hypothesis. There is a statistically significant association between the type of treatment a patient receives and the likelihood of experiencing Biochemical Recurrence (BCR). 
 
 
-
 ```{r, echo=FALSE}
 
 bcr_prop_table <- prop.table(bcr_table, margin = 1)
@@ -438,7 +437,7 @@ barplot(
 
 ```
 
-Hormone Monotherapy had the highest recurrence rate at 43.7%, while Radical Prostatectomy had the lowest at 25.6%. The bar plot visually confirms this, with the red recurrence portion for Hormone Monotherapy (ADT) notably larger and the recurrence portion for Radical Prostatectomy (RP) noticeably smaller compared to other treatment methods.
+Hormone Monotherapy had the highest recurrence rate at 43.7%, while Radical Prostatectomy had the lowest at 25.6%. The bar plot visually confirms this, with the red recurrence portion for Hormone Monotherapy (ADT) notably larger and the recurrence portion for Radical Prostatectomy (RP) noticeably smaller compared to other treatment methods. This result showcases a visual pattern that aligns with the statistical analysis of the chi square test. Thus a multivariate logistic regression analysis can further quantify treatment differences amongst probability of reoccurence of cancer post surgery.
 
 
 
@@ -495,7 +494,7 @@ cat(paste0("Chi-squared = ", round(survival_test$statistic, 4), ", df = ", survi
 
 ```
 
-The Chi-squared test yielded a test statistic of chi^2 = 4.6021 with a corresponding p-value of 0.2034. Since the p-value is greater than the significance level (alpha (a) =0.05), we fail to reject the null hypothesis (H0). Therefore, we can conclude that there is no statistically significant association between the type of treatment a patient receives and the likelihood of their Survival Status (Alive vs. Deceased). The bar plot also supports this conclusion, showing that the distribution of survival rates is not substantially different across the four treatment types.
+The Chi-squared test yielded a test statistic of chi^2 = 4.6021 with a corresponding p-value of 0.2034. Since the p-value is greater than the significance level (alpha (a) =0.05), we fail to reject the null hypothesis (H0). Therefore, we can conclude that there is no statistically significant association between the type of treatment a patient receives and the likelihood of their Survival Status (Alive vs. Deceased). The bar plot also supports this conclusion, showing that the distribution of survival rates is not substantially different across the four treatment types. This is likley due to the fact that survival is influenced by multiple clincal factors as well as enviromental factors outside of pateint data. A multivariate logistic approach can be a better assessment to determine best treatment type.
 
 
 ```{r, echo=FALSE}
@@ -603,11 +602,13 @@ points(means, pch = 8, col = "black", cex = 1.5)
 
 
 ```
-The box plot visually confirms these findings: the PSA distribution for the Radical Prostatectomy (RP) group is noticeably lower than that of all other groups, and its mean value (often marked by a symbol) is the lowest. Conversely, the distribution and mean value for the Hormone Monotherapy (ADT) group are distinctly higher than those for the RP group, visually confirming that patients selected for RP had the lowest initial PSA levels at diagnosis.
+The box plot visually confirms these findings: the PSA distribution for the Radical Prostatectomy (RP) group is noticeably lower than that of all other groups, and its mean value (often marked by a symbol) is the lowest. Conversely, the distribution and mean value for the Hormone Monotherapy (ADT) group are distinctly higher than those for the RP group, visually confirming that patients selected for RP had the lowest initial PSA levels at diagnosis. This showcases how treatment choice is infleunced by intial disease severity, and the best treatemnt can be determined through multivaraite models.
 
 ## PART B) MODELING
 
 ## Data Analysis 0: Correlation between Variables
+
+A Scatterplot Matrix was generated to visually confirm the correlation between clincal and biological variables. This visualization shows the relationship between each pair of variables and the distribution of each variable. Which will detect potential multicollinearity between variables before fitting the regression models.
 
 ```{r, echo=FALSE, fig.width=10, fig.height=10, warning=FALSE, message=FALSE}
 
@@ -649,6 +650,7 @@ ggpairs(
 
 
 ## Data Analysis 1: Logistic Regression (BCR)
+
 ## Data Analysis 2: Logistic Regression (Survival)
 
 ```{r}
