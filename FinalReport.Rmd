@@ -350,27 +350,25 @@ Figure 3 displays the distributions and central tendencies of Prostate-Specific 
 
 ### 4) Analysis aims:
 
+logistic 2, no linear
+bcr > treat.3만 유의해서 3에 대해서 interpretation 
+3을 베이스라인으로 해서 logistic model을 해봤더니 다른 것에 대해서 재발 확률이 높다 
+3에 대한 나머지 회귀 계수들이 음수인 것으로 보아 3의 재발률이 높고, 특히 1의 회귀 계수가 유의한 것으로 보아 1보다 3이 확연히 높다 
+linear regression failure reason 
+- before는 큰데 after가 작으니까 before 수치에 의존하게 되어 쉬가 의미 없어진다
+anova 
+- 차이가 전을 따라가고 (두드러지지 않음) 
+ㄴ pca 떨어진 수준이 확연히 적다 근데 ㅠefore를 떨어지니까 그냥 의사가 확연히 적은 사람들에게 수술을 시술했다 
+
+콤비네이션과는 관련 X
+
+
   The main purpose of our analysis is to compare and quantify the long-term discriminatory effects of major first-line treatment methods for patients with prostate cancer. Some of the analyses we aim to complete will include linear regression models, box plot visualizations, R plots, and numerical summaries. We will apply statistical tests such as ANOVA and t-tests to compare treatment effectiveness across different clinical stages, Gleason scores, and recovery outcomes. If prostate cancer is less aggressive (lower Gleason score and early clinical stage), we expect surgery to yield the best outcomes due to its practicality and reduced long-term side effects compared to radiation or hormonal therapy. To test this, we will use box plots to visually compare recovery rates and PSA level reductions among treatment groups, followed by a one-way ANOVA to test for significant differences in mean recovery rates. We hypothesize that patients with localized, low-stage tumors (Stages 1–2) receiving surgery will have significantly higher recovery rates and lower recurrence probabilities. If the cancer is more aggressive or has metastasized, we hypothesize that hormonal therapy will be more effective because hormones circulate through the bloodstream and can target systemic tumor growth. A multivariate logistic regression model will be used to assess the relationship between treatment type and recurrence or metastasis, controlling for PSA level, tumor size, and patient age. For early-stage cancers (Stages 1–2), radiation therapy may also be effective as a minimally invasive treatment. We will visualize PSA levels and Gleason scores across radiation and surgery groups using box plots, and conduct a t-test to evaluate whether differences in mean PSA reduction between these groups are statistically significant. In advanced stages (Stages 3–4), a combination of hormonal and radiation therapy is expected to provide the best results. We will test this using multivariate logistic regression models for survival and recurrence outcomes, hypothesizing that combination therapy will be associated with the highest survival rates but also with greater treatment intensity and side effects. Overall, these analyses will allow us to statistically evaluate how treatment modality interacts with cancer aggressiveness, Gleason score, and clinical stage to influence recovery, recurrence, and long-term survival outcomes.
   
 ### 4-1) Chi-squared Test on Treatment vs. BCR
 
 H0: Treatment Type and Biochemical Recurrence (BCR) Status are independent. (The recurrence rate is the same across all treatment groups)
 Ha: Treatment Type and Biochemical Recurrence (BCR) Status are not independent. (The recurrence rate is significantly different for at least one treatment group)
-
-```{r, eco=FALSE, include=FALSE}
-
-bcr_table <- table(data$Treatment, data$BCR)
-cat("Frequency Table (Counts):\n")
-print(bcr_table)
-
-bcr_test <- chisq.test(bcr_table)
-cat("\nChi-squared Test Results:\n")
-print(bcr_test)
-
-cat("\nBCR Rate (%) within each Treatment Group:\n")
-round(prop.table(bcr_table, margin = 1) * 100, 1)
-
-```
 
 ```{r, echo=FALSE}
 
@@ -459,6 +457,45 @@ cat("\nSurvival Rate (%) within each Treatment Group (Survival = Alive):\n")
 round(prop.table(survival_table, margin = 1) * 100, 1)
 
 ```
+
+```{r}
+
+survival_table <- table(data$Treatment, data$Survival)
+df_combined_s <- as.data.frame.matrix(survival_table)
+
+survival_rates_pct <- prop.table(survival_table, margin = 1) * 100
+df_combined_s$Survival_Pct_Alive <- round(survival_rates_pct[, "0"], 1) # 0 = Alive
+df_combined_s$Mortality_Pct_Deceased <- round(survival_rates_pct[, "1"], 1) # 1 = Deceased
+
+df_final_s <- df_combined_s[, c("0", "1", "Survival_Pct_Alive", "Mortality_Pct_Deceased")] 
+df_final_s$Treatment_Type <- rownames(df_final_s)
+
+df_final_s <- df_final_s[, c(5, 1, 2, 3, 4)] 
+names(df_final_s) <- c("Treatment Type", 
+                     "Count (Alive)", 
+                     "Count (Deceased)", 
+                     "Survival (%) (Alive)", 
+                     "Mortality (%) (Deceased)")
+
+# 4. Output the Combined Table
+df_final_s %>%
+  kable(caption = "Table 4.3: Association between Treatment Type and Survival Status", 
+        booktabs = TRUE,
+        linesep = "",
+        col.names = c("Treatment Type", 
+                      "Count (Alive)", "Count (Deceased)", 
+                      "Survival (%)", "Mortality (%)"),
+        align = c('l', 'c', 'c', 'c', 'c')) %>% 
+  kable_styling(latex_options = c("hold_position", "scale_down"))
+
+
+# 5. Output Chi-squared statistics
+survival_test <- chisq.test(survival_table) 
+cat("\n\n")
+cat(paste0("Chi-squared = ", round(survival_test$statistic, 4), ", df = ", survival_test$parameter, ", p-value = ", round(survival_test$p.value, 4)))
+
+```
+
 
 Since the p-value (0.2034) is greater than the significance level (a=0.05), we fail to reject the null hypothesis (H0). There is no statistically significant association between the type of treatment a patient receives and the likelihood of their Survival Status (Alive vs Deceased).
 
