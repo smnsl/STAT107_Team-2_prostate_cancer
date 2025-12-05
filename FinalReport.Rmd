@@ -650,13 +650,8 @@ ggpairs(
 
 
 ## Data Analysis 1: Logistic Regression (BCR)
-<<<<<<< HEAD
-=======
 
-## Data Analysis 2: Logistic Regression (Survival)
->>>>>>> 3701321f42399e4602cba4982ae276a2ba179b0d
-
-```{r, echo=FALSE}
+```{r}
 
 bcr_model <- glm(BCR ~ Age + PSA_before + CTstage + GleasonScore_before + Albumin + Lymphocyte + CRP + NLR + CallyIndex + ComorbidityScore + Treatment, data = data, family = binomial, na.action = na.omit)
 
@@ -666,7 +661,7 @@ plot(bcr_model, which = 1)
 
 ```
 
-```{r, echo=FALSE}
+```{r}
 
 bcr_model <- glm(BCR ~ PSA_before + Treatment, data = data, family = binomial, na.action = na.omit)
 
@@ -676,11 +671,10 @@ plot(bcr_model, which = 1)
 
 ```
 
-
-
 ## Data Analysis 2: Logistic Regression (Survival)
 
-```{r, echo=FALSE}
+
+```{r}
 
 survival_model <- glm(Survival ~ Age + PSA_before + CTstage + GleasonScore_before + Albumin + Lymphocyte + CRP + NLR + CallyIndex + ComorbidityScore + Treatment, data = data, family = binomial, na.action = na.omit)
 
@@ -690,7 +684,7 @@ plot(survival_model, which= 2)
 
 ```
 
-```{r, echo=FALSE}
+```{r}
 
 survival_model <- glm(Survival ~ Treatment, data = data, family = binomial, na.action = na.omit)
 
@@ -699,7 +693,6 @@ summary(survival_model)
 plot(survival_model, which = 2)
 
 ```
-
 
 
 ## Model Interpretation 1: Logistic Regression (BCR ~ Treatment)
