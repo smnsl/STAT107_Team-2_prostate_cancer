@@ -318,7 +318,7 @@ par(mfrow = c(1, 1))
 
 ```
  
-figure 2: Side-by-side bar plots for Biochemical Recurrence (BCR) and Survival Status to display the main outcomes. Preliminary findings suggest a differential effect of treatments on recurrence, with Treatment Group 3 (Hormone Therapy) appearing to have the highest recurrence rate. Conversely, the overall survival rates are high across the cohort, and the preliminary visualization of Survival Status (Alive vs. Deceased) does not immediately suggest a strong relationship with treatment type.
+figure 2: Side-by-side bar plots for Biochemical Recurrence (BCR) and Survival Status to display the main outcomes. Preliminary findings suggest a differential effect of treatments on recurrence.
   
 ```{r, echo=FALSE, results='hide', fig.width=9, fig.height=5}
 
@@ -338,7 +338,7 @@ boxplot(data[["PSA_after"]],
           col = "green")
 
 ```
-
+진찰시에는 수치가 높았는데 treatment 후에는 수치가 많이 줄었다.
 
 
 ### Analysis aims:
