@@ -1,21 +1,23 @@
 ---
-Title: FinalReport
-Author: Team 2
-Date: "Due 2025-12-04"
-Output: pdf_document
-output: pdf_document
+title: Treatment Effectiveness in Patients with Prostate Cancer
+author: Jennifer Cho, Narya Elhawary, Minsol Seo
+date: "Due 2025-12-05"
+output:
+  pdf_document:
+    latex_engine: xelatex
 ---
 
-Treatment Effectiveness in Patients with Prostate Cancer 
 
 ```{r setup, include=FALSE}
 library(knitr)
 library(kableExtra)
 ```
 
+
 \begin{center}
 
-**Abstract**
+
+Abstract
 
   This project aims to analyze which treatment option for prostate cancer leads to the highest recovery rate among patients. Prostate cancer is one of the most common cancers among men and is ranked as the "second most frequently diagnosed cancer"(Rawla, 2019). It also remains the "fifth leading cause of death worldwide" (Rawla, 2019), making the identification of the most effective treatment essential. As research in cancer therapy continues to expand, it is imperative to compare the overall effectiveness of different treatment methods, including hormonal therapy, radiation therapy, surgery, and combination therapies, to determine whether a single or combined approach yields better recovery outcomes. This study will evaluate tumor size, initial PSA levels, and biopsy Gleason scores over a one-year period to compare patient recovery and cancer recurrence. Statistical analyses will identify patterns of effectiveness among various treatments and determine which method best improves survival rates while reducing recurrence. It is hypothesized that combination treatments will decrease survival and decrease recurrence, whereas single therapies may yield higher recurrence rates but increased survival rates. By analyzing these relationships, this project seeks to highlight how treatment choice influences recovery rates, recurrence, and long-term survival outcomes for prostate cancer patients.
 
@@ -66,7 +68,7 @@ table_initial <- data.frame(
 )
 
 table_initial %>%
-  kable(caption = "Table 1: Initial Diagnosis Variables", booktabs = TRUE) %>%
+  kable(caption = "Initial Diagnosis Variables", booktabs = TRUE) %>%
   kable_styling(latex_options = "hold_position") %>%
   column_spec(2, width = "6cm")
 
@@ -105,7 +107,7 @@ table_risk <- data.frame(
 )
 
 table_risk %>% 
-  kable(caption = "Table 2: Risk Factors", booktabs = TRUE) %>%
+  kable(caption = "Risk Factors", booktabs = TRUE) %>%
   kable_styling(latex_options = "hold_position") %>%
   column_spec(2, width = "6cm")
 
@@ -144,9 +146,6 @@ table_info <- data.frame(
   Type_of_Data = colC
 )
 
-kable(table_info, caption = "Treatment Information")
-
-
 table_info %>%
   kable(caption = "Treatment Information", booktabs = TRUE) %>%
   kable_styling(latex_options = "hold_position") %>% 
@@ -180,7 +179,7 @@ table_marker <- data.frame(
 )
 
 table_marker %>%
-  kable(caption = "Table 4: Pathological Markers", booktabs = TRUE) %>%
+  kable(caption = "Pathological Markers", booktabs = TRUE) %>%
   kable_styling(latex_options = "hold_position") %>%
   column_spec(2, width = "6cm") 
 
@@ -229,16 +228,16 @@ table_marker <- data.frame(
 )
 
 table_marker %>% 
-  kable(caption = "Table 5: Follow-up \\& Outcomes", booktabs = TRUE) %>%
+  kable(caption = "Follow-up \\& Outcomes", booktabs = TRUE) %>%
   kable_styling(latex_options = "hold_position") %>%
   column_spec(2, width = "7cm")
 
 ```
 
 ### 2-2) Data Cleaning
-To make data sets more consistent, we then decided to delete unnecessary information by removing the corresponding columns. Afterward, converting all categorical variables into factor type was required to ensure that our program, R(Studio), correctly interprets them as discrete categories rather than as continuous values or even strings. Moreover, this foreign data set has named its critical variables in another language that we need to rename in English. Lastly, addressing missing variables and visualizing were involved in each of them in various forms.
+To make data sets more consistent, we then decided to delete unnecessary information by removing the corresponding columns. Afterward, converting all categorical variables into factor type was required to ensure that our program, R(Studio), correctly interprets them as discrete categories rather than as continuous values or even strings. Moreover, this foreign data set has named its critical variables in another language that we need to rename in English. Lastly, addressing missing variables and visualizing were involved in each of them in various forms. These process allow us to observe that missing values were only found for the Hormone Type (ADT_Tipi) variable in patients who did not receive Hormone Therapy (as it is not applicable). Also, information is only present for the specific treatment a patient received (e.g., Radiation Dose is missing for surgery patients and vise versa).
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, results='hide'}
 
 data <- read.csv("00_ProstateCancer_Data.csv", header=T)
 
@@ -254,10 +253,11 @@ names(data) <- c("Patient ID", "Age", "PSA_before", "CTstage", "GleasonScore_bef
 
 
 ### Visualization:
-  The preliminary visualizations and numerical summaries are crucial for preparing and interpreting the three multivariate logistic regression models, as this step is essential for diagnosing data quality, identifying confounding factors, and assessing the signal strength before the formal statistical analysis begins.
+  The preliminary visualizations and numerical summaries are crucial for preparing and interpreting the two multivariate logistic regression models and one linear regression, as this step is essential for diagnosing data quality, identifying confounding factors, and assessing the signal strength before the formal statistical analysis begins.   We’ve established a few bar graphs on the frequency of treatment type, frequency of biochemical recurrence status, survival status, and risk factors. The box plots on PSA level at diagnosis and after treatment will be used to directly confound our numerical data among different treatment groups, as well as interpreting information from risk factors through our numerical summary. We will not use any scatter plot in this model, but we are preparing and interpreting the three multivariate logistic regression modes.
+
   
   
-```{r}
+```{r, echo=FALSE, results='hide'}
 
 sum(is.na(data$Treatment))
 
@@ -265,6 +265,9 @@ table(data$Treatment)
 round(prop.table(table(data$Treatment)), 3)
 
 frequencies <- table(data$Treatment)
+
+names(frequencies) <- c("Surgery", "RT", "Hormone Therapy", "RT + Hormone")
+
 barplot(
     frequencies,
     main = "Frequency of Treatment Type (Treatment)",
@@ -275,10 +278,13 @@ barplot(
     )
 
 ```
-```{r}
+
+
+```{r, echo=FALSE, results='hide', fig.width=9, fig.height=5}
+
+par(mfrow = c(1, 2))
 
 sum(is.na(data$BCR))
-
 table(data$BCR)
 round(prop.table(table(data$BCR)), 3)
 
@@ -292,12 +298,8 @@ barplot(
     ylim = c(0, max(frequencies) * 1.1)
     )
 
-```
-  
-```{r}
 
 sum(is.na(data$Survival))
-
 table(data$Survival)
 round(prop.table(table(data$Survival)), 3)
 
@@ -311,9 +313,14 @@ barplot(
     ylim = c(0, max(frequencies) * 1.1)
     )
 
+par(mfrow = c(1, 1))
+
 ```
+ 
+  description
+  - xlab 
   
-```{r}
+```{r, echo=FALSE, results='hide', fig.width=9, fig.height=5}
 
 PSA <- c("PSA_before", "PSA_after")
 sapply(data[, PSA], function(x) sum(is.na(x)))
@@ -332,7 +339,9 @@ boxplot(data[["PSA_after"]],
 
 ```
   
-```{r}
+```{r, include=FALSE}
+
+# 지금은 X
 
 risk_factors <- c("Albumin", "Lymphocyte", "CRP", "NLR", "CallyIndex", "ComorbidityScore")
 sapply(data[, risk_factors], function(x) sum(is.na(x)))
@@ -368,11 +377,17 @@ barplot(
 
 ```
 
-  
-  We’ve established a few bar graphs on the frequency of treatment type, frequency of biochemical recurrence status, survival status, and risk factors. The box plots on PSA level at diagnosis and after treatment will be used to directly confound our numerical data among different treatment groups, as well as interpreting information from risk factors through our numerical summary. We will not use any scatter plot in this model, but we are preparing and interpreting the three multivariate logistic regression modes.
 
 
 ### Analysis aims:
+
+죽냐사냐는 관계 X
+재발을 하냐 마냐는 그룹간의 차이가 존재
+트리트먼트 3 (호르몬)의 재발율이 제일 높다
+PSA가 얼마나 감소했는가는 그룹1 (수술) 만 혼자 낮음, 나머지는 차이가 없음
+
+
+
   The main purpose of our analysis is to compare and quantify the long-term discriminatory effects of major first-line treatment methods for patients with prostate cancer. Some of the analyses we aim to complete will include linear regression models, box plot visualizations, R plots, and numerical summaries. We will apply statistical tests such as ANOVA and t-tests to compare treatment effectiveness across different clinical stages, Gleason scores, and recovery outcomes. If prostate cancer is less aggressive (lower Gleason score and early clinical stage), we expect surgery to yield the best outcomes due to its practicality and reduced long-term side effects compared to radiation or hormonal therapy. To test this, we will use box plots to visually compare recovery rates and PSA level reductions among treatment groups, followed by a one-way ANOVA to test for significant differences in mean recovery rates. We hypothesize that patients with localized, low-stage tumors (Stages 1–2) receiving surgery will have significantly higher recovery rates and lower recurrence probabilities. If the cancer is more aggressive or has metastasized, we hypothesize that hormonal therapy will be more effective because hormones circulate through the bloodstream and can target systemic tumor growth. A multivariate logistic regression model will be used to assess the relationship between treatment type and recurrence or metastasis, controlling for PSA level, tumor size, and patient age. For early-stage cancers (Stages 1–2), radiation therapy may also be effective as a minimally invasive treatment. We will visualize PSA levels and Gleason scores across radiation and surgery groups using box plots, and conduct a t-test to evaluate whether differences in mean PSA reduction between these groups are statistically significant. In advanced stages (Stages 3–4), a combination of hormonal and radiation therapy is expected to provide the best results. We will test this using multivariate logistic regression models for survival and recurrence outcomes, hypothesizing that combination therapy will be associated with the highest survival rates but also with greater treatment intensity and side effects. Overall, these analyses will allow us to statistically evaluate how treatment modality interacts with cancer aggressiveness, Gleason score, and clinical stage to influence recovery, recurrence, and long-term survival outcomes.
 
 
