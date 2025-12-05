@@ -5,10 +5,22 @@ if (!require(tidyverse)) {      ## If package is not installed
 }
 
 
-# ggplot2
-if (!require(ggplot2)) { 
-  install.packages("ggplot2")
-  library(ggplot2)
+# caTools
+if (!require(caTools)) {
+  install.packages("caTools")
+  library(caTools)
 }
 
 
+# pROC
+if (!require(pROC)) {
+  install.packages("pROC")
+  library(pROC)
+}
+
+
+# ROSE
+if (!require(ROSE)) {
+  install.packages("ROSE")
+  library(ROSE)
+}
