@@ -17,6 +17,20 @@ if (!require(kableExtra)) {
 }
 
 
+# knitr
+if (!require(knitr)) {
+  install.packages("knitr")
+  library(knitr)
+}
+
+
+# kableExtra
+if (!require(kableExtra)) {
+  install.packages("kableExtra")
+  library(kableExtra)
+}
+
+
 # caTools
 if (!require(caTools)) {
   install.packages("caTools")
