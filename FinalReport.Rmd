@@ -355,7 +355,7 @@ Figure 3 displays the distributions and central tendencies of Prostate-Specific 
 
 ### 4) Analysis aims:
 
-  The main purpose of our analysis is to compare and quantify the long-term discriminatory effects of major first-line treatment methods for patients with prostate cancer. Some of the analyses we aim to complete will include linear regression models, box plot visualizations, R plots, and numerical summaries. We will apply statistical tests such as ANOVA and t-tests to compare treatment effectiveness across different clinical stages, Gleason scores, and recovery outcomes. If prostate cancer is less aggressive (lower Gleason score and early clinical stage), we expect surgery to yield the best outcomes due to its practicality and reduced long-term side effects compared to radiation or hormonal therapy. To test this, we will use box plots to visually compare recovery rates and PSA level reductions among treatment groups, followed by a one-way ANOVA to test for significant differences in mean recovery rates. We hypothesize that patients with localized, low-stage tumors (Stages 1–2) receiving surgery will have significantly higher recovery rates and lower recurrence probabilities. If the cancer is more aggressive or has metastasized, we hypothesize that hormonal therapy will be more effective because hormones circulate through the bloodstream and can target systemic tumor growth. A multivariate logistic regression model will be used to assess the relationship between treatment type and recurrence or metastasis, controlling for PSA level, tumor size, and patient age. For early-stage cancers (Stages 1–2), radiation therapy may also be effective as a minimally invasive treatment. We will visualize PSA levels and Gleason scores across radiation and surgery groups using box plots, and conduct a t-test to evaluate whether differences in mean PSA reduction between these groups are statistically significant. In advanced stages (Stages 3–4), a combination of hormonal and radiation therapy is expected to provide the best results. We will test this using multivariate logistic regression models for survival and recurrence outcomes, hypothesizing that combination therapy will be associated with the highest survival rates but also with greater treatment intensity and side effects. Overall, these analyses will allow us to statistically evaluate how treatment modality interacts with cancer aggressiveness, Gleason score, and clinical stage to influence recovery, recurrence, and long-term survival outcomes.
+## PART A) TEST
   
 ### 4-1) Chi-squared Test on Treatment vs. BCR
 
@@ -605,6 +605,155 @@ points(means, pch = 8, col = "black", cex = 1.5)
 ```
 The box plot visually confirms these findings: the PSA distribution for the Radical Prostatectomy (RP) group is noticeably lower than that of all other groups, and its mean value (often marked by a symbol) is the lowest. Conversely, the distribution and mean value for the Hormone Monotherapy (ADT) group are distinctly higher than those for the RP group, visually confirming that patients selected for RP had the lowest initial PSA levels at diagnosis.
 
+## PART B) MODELING
+
+## Data Analysis 0: Correlation between Variables
+
+```{r, echo=FALSE}
+
+vars <- c("Age", "PSA_before", "CTstage", "GleasonScore_before", "Albumin", "Lymphocyte", "CRP", "NLR", "CallyIndex", "ComorbidityScore")
+
+pairs(data[, vars])
+
+```
+
+
+
+## Data Analysis 1: Logistic Regression (BCR)
+
+```{r, echo=FALSE}
+
+bcr_model <- glm(BCR ~ Age + PSA_before + CTstage + GleasonScore_before + Albumin + Lymphocyte + CRP + NLR + CallyIndex + ComorbidityScore + Treatment, data = data, family = binomial, na.action = na.omit)
+
+summary(bcr_model)
+
+plot(bcr_model, which = 1)
+
+```
+
+```{r, echo=FALSE}
+
+bcr_model <- glm(BCR ~ PSA_before + Treatment, data = data, family = binomial, na.action = na.omit)
+
+summary(bcr_model)
+
+plot(bcr_model, which = 1)
+
+```
+
+
+
+## Data Analysis 2: Logistic Regression (Survival)
+
+```{r, echo=FALSE}
+
+survival_model <- glm(Survival ~ Age + PSA_before + CTstage + GleasonScore_before + Albumin + Lymphocyte + CRP + NLR + CallyIndex + ComorbidityScore + Treatment, data = data, family = binomial, na.action = na.omit)
+
+summary(survival_model)
+
+plot(survival_model, which= 2)
+
+```
+
+```{r, echo=FALSE}
+
+survival_model <- glm(Survival ~ Treatment, data = data, family = binomial, na.action = na.omit)
+
+summary(survival_model)
+
+plot(survival_model, which = 2)
+
+```
+
+
+
+## Model Interpretation 1: Logistic Regression (BCR ~ Treatment)
+
+```{r, echo=FALSE}
+
+data$Treatment <- relevel(data$Treatment, ref = 3)
+
+bcr_model_t3 <- glm(BCR ~ PSA_before + Treatment, data = data, family = binomial, na.action = na.omit)
+
+summary(bcr_model_t3)
+
+```
+
+
+
+## Model Interpretation 2: Logistic Regression (BCR ~ Combination)
+
+```{r, echo=FALSE}
+
+data$Combination <- ifelse(data$Treatment == 4, "Yes", "No")
+data$Combination <- as.factor(data$Combination)
+
+bcr_model_2 <- glm(BCR ~ PSA_before + Combination, data = data,family = binomial, na.action = na.omit)
+
+summary(bcr_model_2)
+
+```
+
+
+
+## Model Evaluation:
+
+### Model Fitting and Predicting
+
+```{r, echo=FALSE}
+
+vars_for_model <- c("BCR", "PSA_before", "Treatment")
+model_data <- data[complete.cases(data[, vars_for_model]), vars_for_model]
+
+set.seed(123)
+split_tag <- sample.split(model_data$BCR, SplitRatio = 0.70)
+train_set <- subset(model_data, split_tag == TRUE)
+test_set <- subset(model_data, split_tag == FALSE)
+
+set.seed(123)
+balanced_train_data <- ovun.sample(
+    BCR ~ ., 
+    data = train_set, 
+    method = "over", 
+    N = 2 * sum(train_set$BCR == "False") 
+)$data
+
+bcr_model_train <- glm(BCR ~ PSA_before + Treatment,data = balanced_train_data, family = binomial)
+
+test_probabilities <- predict(bcr_model_train, newdata = test_set, type = "response")
+
+```
+
+
+### Evaluating: AUC (Area Under the Curve)
+
+```{r, echo=FALSE}
+
+roc_obj <- roc(test_set$BCR, test_probabilities)
+auc_score <- auc(roc_obj)
+cat(sprintf("AUC (Area Under the Curve): %.4f\n", auc_score))
+
+```
+
+### Confusion Matrix (Threshold 0.5)
+
+```{r, echo=FALSE}
+test_predictions <- ifelse(test_probabilities > 0.5, "True", "False")
+conf_matrix <- table(Predicted = test_predictions, Actual = test_set$BCR)
+conf_matrix <- conf_matrix[, c("False", "True")]
+
+cat("Confusion Matrix (Threshold 0.5):\n")
+print(conf_matrix)
+
+accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
+sensitivity <- conf_matrix["True", "True"] / sum(conf_matrix[, "True"])
+specificity <- conf_matrix["False", "False"] / sum(conf_matrix[, "False"])
+
+cat(sprintf("   Accuracy: %.4f\n", accuracy))
+cat(sprintf("   Sensitivity: %.4f\n", sensitivity))
+cat(sprintf("   Specificity: %.4f\n", specificity))
+
+```
 
   
 ### 5) Conclusion: 
