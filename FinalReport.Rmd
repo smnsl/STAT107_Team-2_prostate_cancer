@@ -253,7 +253,7 @@ names(data) <- c("Patient ID", "Age", "PSA_before", "CTstage", "GleasonScore_bef
 
 
 ### Visualization:
-  The preliminary visualizations and numerical summaries are crucial for preparing and interpreting the two multivariate logistic regression models and one linear regression, as this step is essential for diagnosing data quality, identifying confounding factors, and assessing the signal strength before the formal statistical analysis begins.   We’ve established a few bar graphs on the frequency of treatment type, frequency of biochemical recurrence status, survival status, and risk factors. The box plots on PSA level at diagnosis and after treatment will be used to directly confound our numerical data among different treatment groups, as well as interpreting information from risk factors through our numerical summary. We will not use any scatter plot in this model, but we are preparing and interpreting the three multivariate logistic regression modes.
+  We use preliminary visualizations and numerical summaries in order to prepare and interpreting the two multivariate logistic regression models and one linear regression, as this step is essential for diagnosing data quality, identifying confounding factors, and assessing the signal strength before the formal statistical analysis begins. We’ve established a few bar graphs on the frequency of treatment type, frequency of biochemical recurrence status, survival status, and risk factors. The box plots on PSA level at diagnosis and after treatment will be used to directly confound our numerical data among different treatment groups, as well as interpreting information from risk factors through our numerical summary.
 
   
   
@@ -278,6 +278,7 @@ barplot(
     )
 
 ```
+Figure 1: Illustration of distribution of the four main treatment groups across the patient cohort.
 
 
 ```{r, echo=FALSE, results='hide', fig.width=9, fig.height=5}
@@ -317,8 +318,7 @@ par(mfrow = c(1, 1))
 
 ```
  
-  description
-  - xlab 
+figure 2: Side-by-side bar plots for Biochemical Recurrence (BCR) and Survival Status to display the main outcomes. Preliminary findings suggest a differential effect of treatments on recurrence, with Treatment Group 3 (Hormone Therapy) appearing to have the highest recurrence rate. Conversely, the overall survival rates are high across the cohort, and the preliminary visualization of Survival Status (Alive vs. Deceased) does not immediately suggest a strong relationship with treatment type.
   
 ```{r, echo=FALSE, results='hide', fig.width=9, fig.height=5}
 
@@ -338,55 +338,10 @@ boxplot(data[["PSA_after"]],
           col = "green")
 
 ```
-  
-```{r, include=FALSE}
-
-# 지금은 X
-
-risk_factors <- c("Albumin", "Lymphocyte", "CRP", "NLR", "CallyIndex", "ComorbidityScore")
-sapply(data[, risk_factors], function(x) sum(is.na(x)))
-
-summary(data[, risk_factors])
-
-continuous_risks <- c("Albumin", "CRP", "NLR", "CallyIndex")
-plot_colors <- rainbow(4)
-
-par(mfrow = c(1,4))
-
-for (i in 1:length(continuous_risks)) {
-  var_name <- continuous_risks[i]
-  var_data <- data[[var_name]]
-  
-  boxplot(var_data,
-          main = paste("Box Plot of", var_name),
-          ylab = var_name,
-          col = plot_colors[i])
-}
-
-par(mfrow = c(1,1))
-
-frequencies <- table(data$ComorbidityScore)
-barplot(
-    frequencies,
-    main = "Frequency of Comorbidity Score (ComorbidityScore)",
-    xlab = "Comorbidity Score",
-    ylab = "Number of Patients",
-    col = rainbow(6),
-    ylim = c(0, max(frequencies) * 1.1)
-    )
-
-```
 
 
 
 ### Analysis aims:
-
-죽냐사냐는 관계 X
-재발을 하냐 마냐는 그룹간의 차이가 존재
-트리트먼트 3 (호르몬)의 재발율이 제일 높다
-PSA가 얼마나 감소했는가는 그룹1 (수술) 만 혼자 낮음, 나머지는 차이가 없음
-
-
 
   The main purpose of our analysis is to compare and quantify the long-term discriminatory effects of major first-line treatment methods for patients with prostate cancer. Some of the analyses we aim to complete will include linear regression models, box plot visualizations, R plots, and numerical summaries. We will apply statistical tests such as ANOVA and t-tests to compare treatment effectiveness across different clinical stages, Gleason scores, and recovery outcomes. If prostate cancer is less aggressive (lower Gleason score and early clinical stage), we expect surgery to yield the best outcomes due to its practicality and reduced long-term side effects compared to radiation or hormonal therapy. To test this, we will use box plots to visually compare recovery rates and PSA level reductions among treatment groups, followed by a one-way ANOVA to test for significant differences in mean recovery rates. We hypothesize that patients with localized, low-stage tumors (Stages 1–2) receiving surgery will have significantly higher recovery rates and lower recurrence probabilities. If the cancer is more aggressive or has metastasized, we hypothesize that hormonal therapy will be more effective because hormones circulate through the bloodstream and can target systemic tumor growth. A multivariate logistic regression model will be used to assess the relationship between treatment type and recurrence or metastasis, controlling for PSA level, tumor size, and patient age. For early-stage cancers (Stages 1–2), radiation therapy may also be effective as a minimally invasive treatment. We will visualize PSA levels and Gleason scores across radiation and surgery groups using box plots, and conduct a t-test to evaluate whether differences in mean PSA reduction between these groups are statistically significant. In advanced stages (Stages 3–4), a combination of hormonal and radiation therapy is expected to provide the best results. We will test this using multivariate logistic regression models for survival and recurrence outcomes, hypothesizing that combination therapy will be associated with the highest survival rates but also with greater treatment intensity and side effects. Overall, these analyses will allow us to statistically evaluate how treatment modality interacts with cancer aggressiveness, Gleason score, and clinical stage to influence recovery, recurrence, and long-term survival outcomes.
 
