@@ -115,6 +115,7 @@ summary(bcr_model_t3)
 ```
 
 
+
 ## Model Interpretation 2: Logistic Regression (BCR ~ Combination)
 
 ```{r, eco=FALSE}
@@ -125,5 +126,68 @@ data$Combination <- as.factor(data$Combination)
 bcr_model_2 <- glm(BCR ~ PSA_before + Combination, data = data,family = binomial, na.action = na.omit)
 
 summary(bcr_model_2)
+
+```
+
+
+
+## Model Evaluation:
+
+### Model Fitting and Predicting
+
+```{r, eco=FALSE}
+
+source("00_requirements.R")
+
+vars_for_model <- c("BCR", "PSA_before", "Treatment")
+model_data <- data[complete.cases(data[, vars_for_model]), vars_for_model]
+
+set.seed(123)
+split_tag <- sample.split(model_data$BCR, SplitRatio = 0.70)
+train_set <- subset(model_data, split_tag == TRUE)
+test_set <- subset(model_data, split_tag == FALSE)
+
+set.seed(123)
+balanced_train_data <- ovun.sample(
+    BCR ~ ., 
+    data = train_set, 
+    method = "over", 
+    N = 2 * sum(train_set$BCR == "False") 
+)$data
+
+bcr_model_train <- glm(BCR ~ PSA_before + Treatment,data = balanced_train_data, family = binomial)
+
+test_probabilities <- predict(bcr_model_train, newdata = test_set, type = "response")
+
+```
+
+
+### Evaluating: AUC (Area Under the Curve)
+
+```{r, eco=FALSE}
+
+roc_obj <- roc(test_set$BCR, test_probabilities)
+auc_score <- auc(roc_obj)
+cat(sprintf("AUC (Area Under the Curve): %.4f\n", auc_score))
+
+```
+
+### Confusion Matrix (Threshold 0.5)
+
+```{r, eco=FALSE}
+test_predictions <- ifelse(test_probabilities > 0.5, "True", "False")
+conf_matrix <- table(Predicted = test_predictions, Actual = test_set$BCR)
+conf_matrix <- conf_matrix[, c("False", "True")]
+
+cat("Confusion Matrix (Threshold 0.5):\n")
+print(conf_matrix)
+
+accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
+sensitivity <- conf_matrix["True", "True"] / sum(conf_matrix[, "True"])
+specificity <- conf_matrix["False", "False"] / sum(conf_matrix[, "False"])
+
+cat(sprintf("   Accuracy: %.4f\n", accuracy))
+cat(sprintf("   Sensitivity: %.4f\n", sensitivity))
+cat(sprintf("   Specificity: %.4f\n", specificity))
 
 ```
