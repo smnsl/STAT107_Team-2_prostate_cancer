@@ -4,7 +4,7 @@ author: Jennifer Cho, Narya Elhawary, Minsol Seo
 date: "Due 2025-12-05"
 output:
   pdf_document:
-    latex_engine: xelatex
+    latex_engine: lualatex
 ---
 
 
@@ -649,18 +649,59 @@ ggpairs(
 
 
 ## Data Analysis 1: Logistic Regression (BCR)
+## Data Analysis 2: Logistic Regression (Survival)
 
-```{r, echo=FALSE}
+```{r}
 
 bcr_model <- glm(BCR ~ Age + PSA_before + CTstage + GleasonScore_before + Albumin + Lymphocyte + CRP + NLR + CallyIndex + ComorbidityScore + Treatment, data = data, family = binomial, na.action = na.omit)
 
-summary(bcr_model)
+model_tidy <- tidy(
+  bcr_model, 
+  exponentiate = TRUE, 
+  conf.int = TRUE
+)
 
-plot(bcr_model, which = 1)
+final_table <- model_tidy %>%
+  select(term, estimate, conf.low, conf.high, p.value) %>%
+  
+mutate(
+    `95% CI` = paste0("(", round(conf.low, 3), ", ", round(conf.high, 3), ")"),
+    `P-Value` = format.pval(p.value, digits = 4, eps = 1e-05, scientific = FALSE, stars = TRUE),
+    `Odds Ratio` = round(estimate, 3)
+  ) %>%
+  
+  select(
+    Predictor = term, 
+    `Odds Ratio`, 
+    `95% CI`, 
+    `P-Value`
+  )
+
+final_table %>%
+  kable(
+    caption = "Multivariate Logistic Regression Results for Biochemical Recurrence (BCR)",
+    booktabs = TRUE,
+    linesep = "",
+    align = c('l', 'r', 'c', 'c') 
+  ) %>%
+  kable_styling(
+    latex_options = c("hold_position", "scale_down"), 
+    full_width = FALSE
+  ) %>%
+  footnote(
+    general = "Odds Ratios (OR) and 95% Confidence Intervals are presented. OR > 1 indicates increased odds of BCR. *** p < 0.001, ** p < 0.01, * p < 0.05.",
+    threeparttable = TRUE
+  )
+
+par(mfrow=c(2,2)) 
+
+plot(bcr_model) 
+
+par(mfrow=c(1,1))
 
 ```
 
-```{r, echo=FALSE}
+```{r}
 
 bcr_model <- glm(BCR ~ PSA_before + Treatment, data = data, family = binomial, na.action = na.omit)
 
@@ -669,31 +710,6 @@ summary(bcr_model)
 plot(bcr_model, which = 1)
 
 ```
-
-
-
-## Data Analysis 2: Logistic Regression (Survival)
-
-```{r, echo=FALSE}
-
-survival_model <- glm(Survival ~ Age + PSA_before + CTstage + GleasonScore_before + Albumin + Lymphocyte + CRP + NLR + CallyIndex + ComorbidityScore + Treatment, data = data, family = binomial, na.action = na.omit)
-
-summary(survival_model)
-
-plot(survival_model, which= 2)
-
-```
-
-```{r, echo=FALSE}
-
-survival_model <- glm(Survival ~ Treatment, data = data, family = binomial, na.action = na.omit)
-
-summary(survival_model)
-
-plot(survival_model, which = 2)
-
-```
-
 
 
 ## Model Interpretation 1: Logistic Regression (BCR ~ Treatment)

@@ -5,6 +5,13 @@ if (!require(tidyverse)) {      ## If package is not installed
 }
 
 
+#broom
+if (!require(broom)) {      
+  install.packages("broom") 
+  library(broom)            
+}
+
+
 #GGally
 if (!require(GGally)) {      
   install.packages("GGally") 
