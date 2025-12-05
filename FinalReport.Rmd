@@ -11,6 +11,7 @@ output:
 ```{r setup, include=FALSE}
 library(knitr)
 library(kableExtra)
+
 ```
 
 
@@ -266,7 +267,7 @@ round(prop.table(table(data$Treatment)), 3)
 
 frequencies <- table(data$Treatment)
 
-names(frequencies) <- c("Surgery", "RT", "Hormone Therapy", "RT + Hormone")
+names(frequencies) <- c("Surgery", "RT", "Hormone", "RT + Hormone")
 
 barplot(
     frequencies,
@@ -287,31 +288,35 @@ par(mfrow = c(1, 2))
 
 sum(is.na(data$BCR))
 table(data$BCR)
-round(prop.table(table(data$BCR)), 3)
 
-frequencies <- table(data$BCR)
+frequencies_bcr <- table(data$BCR)
+
+names(frequencies_bcr) <- c("No Recurrence", "Recurrence")
+
 barplot(
-    frequencies,
+    frequencies_bcr,
     main = "Frequency of Biochemical Recurrence Status",
     xlab = "Recurrence Status",
     ylab = "Number of Patients",
     col = c("blue", "red"),
-    ylim = c(0, max(frequencies) * 1.1)
+    ylim = c(0, max(frequencies_bcr) * 1.1)
     )
-
 
 sum(is.na(data$Survival))
 table(data$Survival)
-round(prop.table(table(data$Survival)), 3)
 
-frequencies <- table(data$Survival)
+
+frequencies_survival <- table(data$Survival)
+
+names(frequencies_survival) <- c("Alive", "Deceased")
+
 barplot(
-    frequencies,
+    frequencies_survival,
     main = "Frequency of Survival Status",
     xlab = "Survival Status",
     ylab = "Number of Patients",
     col = c("blue", "red"),
-    ylim = c(0, max(frequencies) * 1.1)
+    ylim = c(0, max(frequencies_survival) * 1.1)
     )
 
 par(mfrow = c(1, 1))
@@ -350,29 +355,20 @@ Figure 3 displays the distributions and central tendencies of Prostate-Specific 
 
 ### 4) Analysis aims:
 
-logistic 2, no linear
-bcr > treat.3만 유의해서 3에 대해서 interpretation 
-3을 베이스라인으로 해서 logistic model을 해봤더니 다른 것에 대해서 재발 확률이 높다 
-3에 대한 나머지 회귀 계수들이 음수인 것으로 보아 3의 재발률이 높고, 특히 1의 회귀 계수가 유의한 것으로 보아 1보다 3이 확연히 높다 
-linear regression failure reason 
-- before는 큰데 after가 작으니까 before 수치에 의존하게 되어 쉬가 의미 없어진다
-anova 
-- 차이가 전을 따라가고 (두드러지지 않음) 
-ㄴ pca 떨어진 수준이 확연히 적다 근데 ㅠefore를 떨어지니까 그냥 의사가 확연히 적은 사람들에게 수술을 시술했다 
-
-콤비네이션과는 관련 X
-
-
   The main purpose of our analysis is to compare and quantify the long-term discriminatory effects of major first-line treatment methods for patients with prostate cancer. Some of the analyses we aim to complete will include linear regression models, box plot visualizations, R plots, and numerical summaries. We will apply statistical tests such as ANOVA and t-tests to compare treatment effectiveness across different clinical stages, Gleason scores, and recovery outcomes. If prostate cancer is less aggressive (lower Gleason score and early clinical stage), we expect surgery to yield the best outcomes due to its practicality and reduced long-term side effects compared to radiation or hormonal therapy. To test this, we will use box plots to visually compare recovery rates and PSA level reductions among treatment groups, followed by a one-way ANOVA to test for significant differences in mean recovery rates. We hypothesize that patients with localized, low-stage tumors (Stages 1–2) receiving surgery will have significantly higher recovery rates and lower recurrence probabilities. If the cancer is more aggressive or has metastasized, we hypothesize that hormonal therapy will be more effective because hormones circulate through the bloodstream and can target systemic tumor growth. A multivariate logistic regression model will be used to assess the relationship between treatment type and recurrence or metastasis, controlling for PSA level, tumor size, and patient age. For early-stage cancers (Stages 1–2), radiation therapy may also be effective as a minimally invasive treatment. We will visualize PSA levels and Gleason scores across radiation and surgery groups using box plots, and conduct a t-test to evaluate whether differences in mean PSA reduction between these groups are statistically significant. In advanced stages (Stages 3–4), a combination of hormonal and radiation therapy is expected to provide the best results. We will test this using multivariate logistic regression models for survival and recurrence outcomes, hypothesizing that combination therapy will be associated with the highest survival rates but also with greater treatment intensity and side effects. Overall, these analyses will allow us to statistically evaluate how treatment modality interacts with cancer aggressiveness, Gleason score, and clinical stage to influence recovery, recurrence, and long-term survival outcomes.
   
 ### 4-1) Chi-squared Test on Treatment vs. BCR
 
-H0: Treatment Type and Biochemical Recurrence (BCR) Status are independent. (The recurrence rate is the same across all treatment groups)
-Ha: Treatment Type and Biochemical Recurrence (BCR) Status are not independent. (The recurrence rate is significantly different for at least one treatment group)
-
 ```{r, echo=FALSE}
 
-bcr_table <- table(data$Treatment, data$BCR)
+data$Treatment_Label <- factor(data$Treatment,
+                               levels = c(1, 2, 3, 4),
+                               labels = c("Radical Prostatectomy", 
+                                          "Radiotherapy (RT)", 
+                                          "Hormone Monotherapy", 
+                                          "Combination (RT + Hormone)"))
+
+bcr_table <- table(data$Treatment_Label, data$BCR)
 df_combined <- as.data.frame.matrix(bcr_table)
 
 df_combined$Total_Count <- rowSums(df_combined)
@@ -391,7 +387,7 @@ names(df_final) <- c("Treatment Type",
                      "Recurrence (%) (True)")
 
 df_final %>%
-  kable(caption = "Association between Treatment Type and Biochemical Recurrence (BCR)", 
+  kable(caption = "4.1 Association between Treatment Type and Biochemical Recurrence (BCR)", 
         booktabs = TRUE,
         linesep = "",
         align = c('l', 'c', 'c', 'c', 'c')) %>% 
@@ -406,6 +402,9 @@ cat(paste0("Chi-squared = ", round(bcr_test$statistic, 4), ", df = ", bcr_test$p
 
 ```
 
+H0: Treatment Type and Biochemical Recurrence (BCR) Status are independent. (The recurrence rate is the same across all treatment groups)
+
+Ha: Treatment Type and Biochemical Recurrence (BCR) Status are not independent. (The recurrence rate is significantly different for at least one treatment group)
 
 Since the p-value (0.0294) is less than the significance level (a=0.05), we reject the null hypothesis (H0). There is a statistically significant association between the type of treatment a patient receives and the likelihood of experiencing Biochemical Recurrence (BCR).
 
@@ -413,7 +412,7 @@ Highest Recurrence Rate: Treatment Type 3 (Hormone Therapy (ADT) Monotherapy) sh
 
 Lowest Recurrence Rate: Treatment Type 1 (Radical Prostatectomy) showed the lowest recurrence rate at 25.6%.
 
-```{r, eco=FALSE}
+```{r, echo=FALSE}
 
 bcr_prop_table <- prop.table(bcr_table, margin = 1)
 
@@ -440,27 +439,17 @@ barplot(
 
 
 ### 4-2) Chi-squared Test on Treatment vs. Survival
-H0: Treatment Type and Survival Status are independent. (The survival rate is the same across all treatment groups)
-Ha: Treatment Type and Survival Status are not independent. (The survival rate is significantly different for at least one treatment group)
 
-```{r, eco=FALSE}
+```{r, echo=FALSE}
 
-survival_table <- table(data$Treatment, data$Survival)
-cat("Frequency Table (Counts):\n")
-print(survival_table)
+data$Treatment_Label <- factor(data$Treatment,
+                               levels = c(1, 2, 3, 4),
+                               labels = c("Radical Prostatectomy", 
+                                          "Radiotherapy (RT)", 
+                                          "Hormone Monotherapy", 
+                                          "Combination (RT + Hormone)"))
 
-survival_test <- chisq.test(survival_table)
-cat("\nChi-squared Test Results:\n")
-print(survival_test)
-
-cat("\nSurvival Rate (%) within each Treatment Group (Survival = Alive):\n")
-round(prop.table(survival_table, margin = 1) * 100, 1)
-
-```
-
-```{r}
-
-survival_table <- table(data$Treatment, data$Survival)
+survival_table <- table(data$Treatment_Label, data$Survival)
 df_combined_s <- as.data.frame.matrix(survival_table)
 
 survival_rates_pct <- prop.table(survival_table, margin = 1) * 100
@@ -477,9 +466,8 @@ names(df_final_s) <- c("Treatment Type",
                      "Survival (%) (Alive)", 
                      "Mortality (%) (Deceased)")
 
-# 4. Output the Combined Table
 df_final_s %>%
-  kable(caption = "Table 4.3: Association between Treatment Type and Survival Status", 
+  kable(caption = "Table 4.2: Association between Treatment Type and Survival Status", 
         booktabs = TRUE,
         linesep = "",
         col.names = c("Treatment Type", 
@@ -488,8 +476,6 @@ df_final_s %>%
         align = c('l', 'c', 'c', 'c', 'c')) %>% 
   kable_styling(latex_options = c("hold_position", "scale_down"))
 
-
-# 5. Output Chi-squared statistics
 survival_test <- chisq.test(survival_table) 
 cat("\n\n")
 cat(paste0("Chi-squared = ", round(survival_test$statistic, 4), ", df = ", survival_test$parameter, ", p-value = ", round(survival_test$p.value, 4)))
@@ -497,9 +483,12 @@ cat(paste0("Chi-squared = ", round(survival_test$statistic, 4), ", df = ", survi
 ```
 
 
+H0: Treatment Type and Survival Status are independent. (The survival rate is the same across all treatment groups)
+Ha: Treatment Type and Survival Status are not independent. (The survival rate is significantly different for at least one treatment group)
+
 Since the p-value (0.2034) is greater than the significance level (a=0.05), we fail to reject the null hypothesis (H0). There is no statistically significant association between the type of treatment a patient receives and the likelihood of their Survival Status (Alive vs Deceased).
 
-```{r, eco=FALSE}
+```{r, echo=FALSE}
 
 survival_prop_table <- prop.table(survival_table, margin = 1)
 
@@ -524,9 +513,56 @@ barplot(
 
 ```
 
+### 4-3) ANOVA Test, Treatment vs PSA Difference
+
+```{r, echo=FALSE}
+
+mean_psa_df <- data.frame(
+  Treatment_Type = c("1 (Surgery)", "2 (RT)", "3 (Hormone Therapy)", "4 (RT + Hormone)"),
+  Mean_Delta_PSA = c(53.905, 68.503, 83.659, 70.428)
+)
+
+mean_psa_df %>%
+  kable(caption = "Mean PSA Reduction (Delta PSA) by Treatment Type",
+        booktabs = TRUE,
+        linesep = "",
+        col.names = c("Treatment Type",
+                      "Mean Reduction (PSA_before - PSA_after)"),
+        align = c('l', 'r')) %>%
+  kable_styling(latex_options = "hold_position")
 
 
-### 4-3) 
+tukey_data <- data.frame(
+  Group_1 = c("1 (Surgery)", "1 (Surgery)", "1 (Surgery)", "2 (RT)", "2 (RT)", "3 (Hormone Therapy)"),
+  Group_2 = c("2 (RT)", "3 (Hormone Therapy)", "4 (RT + Hormone)", "3 (Hormone Therapy)", "4 (RT + Hormone)", "4 (RT + Hormone)"),
+  Mean_Difference = c(14.598, 29.754, 16.523, 15.157, 1.925, -13.232),
+  p_value = c(0.0056, 0.0000, 0.0151, 0.0821, 0.9874, 0.2536),
+  Significant = c("Yes", "Yes", "Yes", "No", "No", "No")
+)
+
+tukey_data %>%
+  kable(caption = "Table 4.3: Tukey's HSD Post-Hoc Test for Delta PSA",
+        booktabs = TRUE,
+        linesep = "",
+        col.names = c("Group 1", "Group 2", "Mean Difference", "p-value", "Significant (p < 0.05)"),
+        align = c('l', 'l', 'r', 'r', 'c')) %>%
+  kable_styling(latex_options = c("hold_position", "scale_down"))
+
+```
+
+
+H0: The mean change in PSA (Delta PSA) is the same across all four Treatment Type groups
+
+Ha: The mean change in PSA (Delta PSA) is significantly different for at least one treatment group
+
+Since the p-value (2.66e-06) is less than the significance level (a=0.05), we reject the null hypothesis (H0). There is a statistically significant difference in the mean change in PSA (Delta PSA) among the different treatment groups.
+
+The mean PSA change (Delta PSA, where a larger value indicates a greater reduction) in the Radical Prostatectomy (Treatment 1) group is significantly smaller than the mean change in all other treatment groups (2, 3, and 4).
+
+Largest Mean Difference: Treatment 3 (Hormone Therapy Monotherapy) showed the largest positive mean difference (Delta PSA = 29.755) compared to Treatment 1, indicating the greatest average PSA reduction after treatment.
+
+No Significant Difference: There is no significant difference in the mean PSA Difference among the three non-surgical groups (Treatment 2, 3, and 4).
+
 
 
 ### 4-4) 
