@@ -1,0 +1,129 @@
+---
+title: "Data Processing"
+author: "Team 2"
+date: "2025-11-03"
+output: pdf_document
+---
+
+
+```{r, eco=FALSE}
+
+data <- read.csv("00_ProstateCancer_Data.csv", header=T)
+
+```
+
+```{r, eco=FALSE}
+
+cols1 <- c("Tani_Tarihi", "Tedavi_Tarihi", "PSA_Takip_3ay", "PSA_Takip_6ay", "PSA_Takip_12ay", "BCR_Tarihi", "Metastaz_Tarihi", "Son_Takip_Tarihi")
+
+data <- data[, !(names(data) %in% cols1)]
+
+```
+
+```{r, eco=FALSE}
+
+cols2 <- c("Klinik_Evre", "Biyopsi_Gleason", "Risk_Grubu", "Komorbidite_Skor", "Tedavi_Tipi", "ADT_Tipi", "Patolojik_Evre", "Cerrahi_Sinir", "Final_Gleason", "BCR_Durum", "Metastaz_Durum", "Son_Durum")
+
+data[cols2] <- lapply(data[cols2], as.factor)
+
+```
+
+```{r, eco=FALSE}
+
+names(data) <- c("Patient ID", "Age", "PSA_before", "CTstage", "GleasonScore_before", "RiskClass", "Albumin", "Lymphocyte", "CRP", "NLR", "CallyIndex", "ComorbidityScore", "Treatment", "RadiationDose", "HormoneType", "HormonDuration" ,"TumorSize", "MarginStatus", "GleasonScore_after", "PSA_after", "BCR", "Metastasis", "Survival")
+
+```
+
+```{r, eco=FALSE}
+
+data$Delta_PSA <- data$PSA_before - data$PSA_after
+
+```
+
+
+
+## Data Analysis 0: Correlation between Variables
+
+```{r, eco=FALSE}
+
+vars <- c("Age", "PSA_before", "CTstage", "GleasonScore_before", "Albumin", "Lymphocyte", "CRP", "NLR", "CallyIndex", "ComorbidityScore")
+
+pairs(data[, vars])
+
+```
+
+
+
+## Data Analysis 1: Logistic Regression (BCR)
+
+```{r, eco=FALSE}
+
+bcr_model <- glm(BCR ~ Age + PSA_before + CTstage + GleasonScore_before + Albumin + Lymphocyte + CRP + NLR + CallyIndex + ComorbidityScore + Treatment, data = data, family = binomial, na.action = na.omit)
+
+summary(bcr_model)
+
+plot(bcr_model, which = 1)
+
+```
+
+```{r, eco=FALSE}
+
+bcr_model <- glm(BCR ~ PSA_before + Treatment, data = data, family = binomial, na.action = na.omit)
+
+summary(bcr_model)
+
+plot(bcr_model, which = 1)
+
+```
+
+
+
+## Data Analysis 2: Logistic Regression (Survival)
+
+```{r, eco=FALSE}
+
+survival_model <- glm(Survival ~ Age + PSA_before + CTstage + GleasonScore_before + Albumin + Lymphocyte + CRP + NLR + CallyIndex + ComorbidityScore + Treatment, data = data, family = binomial, na.action = na.omit)
+
+summary(survival_model)
+
+plot(survival_model, which= 2)
+
+```
+
+```{r, eco=FALSE}
+
+survival_model <- glm(Survival ~ Treatment, data = data, family = binomial, na.action = na.omit)
+
+summary(survival_model)
+
+plot(survival_model, which = 2)
+
+```
+
+
+
+## Model Interpretation 1: Logistic Regression (BCR ~ Treatment)
+
+```{r, eco=FALSE}
+
+data$Treatment <- relevel(data$Treatment, ref = 3)
+
+bcr_model_t3 <- glm(BCR ~ PSA_before + Treatment, data = data, family = binomial, na.action = na.omit)
+
+summary(bcr_model_t3)
+
+```
+
+
+## Model Interpretation 2: Logistic Regression (BCR ~ Combination)
+
+```{r, eco=FALSE}
+
+data$Combination <- ifelse(data$Treatment == 4, "Yes", "No")
+data$Combination <- as.factor(data$Combination)
+
+bcr_model_2 <- glm(BCR ~ PSA_before + Combination, data = data,family = binomial, na.action = na.omit)
+
+summary(bcr_model_2)
+
+```
