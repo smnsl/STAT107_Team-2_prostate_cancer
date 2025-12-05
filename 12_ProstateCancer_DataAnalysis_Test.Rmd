@@ -148,51 +148,50 @@ barplot(
 
 
 
-## Data Analysis 3: ANOVA Test, Treatment vs PSA Difference
+## Data Analysis 3: ANOVA Test, Treatment vs PSA at diagnosis
 
 ### Hypotheses
 
-H0: The mean change in PSA (Delta PSA) is the same across all four Treatment Type groups
+H0: PSA at diagnosis is the same across all four Treatment Type groups
 
-Ha: The mean change in PSA (Delta PSA) is significantly different for at least one treatment group
+Ha: PSA at diagnosis is significantly different for at least one treatment group
 
 ```{r, eco=FALSE}
 
-data$Delta_PSA <- data$PSA_before - data$PSA_after
+anova_result <- aov(PSA_before ~ Treatment, data = data)
 
-anova_result <- aov(Delta_PSA ~ Treatment, data = data)
 summary(anova_result)
 
 TukeyHSD(anova_result)
 
 ```
 
-**Conclusion**: Since the p-value (2.66e-06) is less than the significance level (a=0.05), we reject the null hypothesis (H0).
+**Conclusion**: Since the p-value (1.6e-06) is less than the significance level (a=0.05), we reject the null hypothesis (H0).
 
-**Interpretation**: Interpretation: There is a statistically significant difference in the mean change in PSA (Delta PSA) among the different treatment groups.
+**Interpretation**: There is a statistically significant difference in the mean PSA at diagnosis (PSA_before) among the different treatment groups.
 
 **Tukey's HSD Interpretation**:
 
-The mean PSA change (Delta PSA, where a larger value indicates a greater reduction) in the Radical Prostatectomy (Treatment 1) group is significantly smaller than the mean change in all other treatment groups (2, 3, and 4).
+The mean PSA at diagnosis for the Radical Prostatectomy (Treatment 1) group is significantly smaller than the mean PSA at diagnosis for all other treatment groups (Treatment 2, 3, and 4).
 
-Largest Mean Difference: Treatment 3 (Hormone Therapy Monotherapy) showed the largest positive mean difference (Delta PSA = 29.755) compared to Treatment 1, indicating the greatest average PSA reduction after treatment.
+The difference between Treatment 3 and Treatment 1 showed the largest mean difference (diff=30.21). This indicates that the Treatment 3 (Hormone Therapy Monotherapy) group had the highest average PSA at diagnosis, while Treatment 1 had the lowest.
 
-No Significant Difference: There is no significant difference in the mean PSA Difference among the three non-surgical groups (Treatment 2, 3, and 4).
+There is no significant difference in the mean PSA at diagnosis among the three non-surgical groups (Treatment 2, 3, and 4) in their pairwise comparisons.
 
 
 ```{r, eco=FALSE}
 
 par(mar = c(5, 4, 4, 2) + 0.1)
-boxplot(Delta_PSA ~ Treatment,
+boxplot(PSA_before ~ Treatment,
         data = data,
-        main = "Delta PSA Distribution by Treatment Type",
+        main = "PSA at Diagnosis Distribution by Treatment Type",
         xlab = "Treatment Type",
-        ylab = "Delta PSA (PSA at diagnosis - PSA after treatment)",
+        ylab = "PSA at diagnosis",
         col = rainbow(4),
         names = c("RP", "RT", "ADT", "RT + ADT")
 )
 
-means <- tapply(data$Delta_PSA, data$Treatment, mean, na.rm=TRUE)
+means <- tapply(data$PSA_before, data$Treatment, mean, na.rm=TRUE)
 points(means, pch = 8, col = "black", cex = 1.5)
 
 ```
