@@ -296,6 +296,106 @@ barplot(
     )
 
 ```
+## Analysis Aim 1: Multivariate Logistic Regression model of best treatment type for preventing recurrence
+
+```{r}
+
+vars_model1<-c("BCR","Treatment","PSA_before", "CTstage","GleasonScore_before", "Age", "RiskClass", "ComorbidityScore")
+
+model1_data<-data[complete.cases(data[, vars_model1]), vars_model1]
+
+model1_data$Treatment<- relevel(model1_data$Treatment,ref="1")
+
+str(model1_data)
+
+model1_full<-glm(
+  BCR~ Treatment +PSA_before +CTstage + GleasonScore_before +Age + RiskClass + ComorbidityScore,
+  data=model1_data,
+  family=binomial()
+                )
+summary(model1_full)
+
+plot(model1_full)
+
+## or this
+
+Vars_model2<-c("BCR", "Treatment")
+
+model2_data<-data[complete.cases(data[, Vars_model2]), Vars_model2]
+
+
+str(model2_data)
+
+
+log_model2<-glm(
+  BCR~Treatment,
+  data= model2_data,
+  family=binomial
+                )
+
+summary(log_model2)
+
+plot(log_model2)
+
+```
+
+## Analysis Aim 2: Linear Regression model of best treatment type for highly aggressive tumors
 
 
 
+```{r}
+
+high_aggressive <- subset(
+  data,
+  RiskClass == "3" &
+    !is.na(PSA_before) &
+    !is.na(PSA_after) &
+    !is.na(Treatment)
+)
+
+
+nrow(high_aggressive)
+head(high_aggressive)
+
+if (nrow(high_aggressive) == 0) {
+  message("No rows with RiskClass == '3' and non-missing PSA/Treatment.")
+} else {
+
+  #
+  psa_means <- aggregate(
+    cbind(PSA_before, PSA_after) ~ Treatment,
+    data = high_aggressive,
+    FUN  = mean
+  )
+
+  psa_means
+
+
+  psa_means$PSA_ratio <- psa_means$PSA_after / psa_means$PSA_before
+  psa_means
+
+
+  x <- as.numeric(psa_means$Treatment)  
+  y <- psa_means$PSA_ratio
+
+
+  lm_high <- lm(y ~ x)
+  summary(lm_high)
+
+
+  plot(
+    x, y,
+    xaxt = "n",
+    xlab = "Treatment Type (1 = Surgery, 2 = RT, 3 = HT, 4 = RT+HT)",
+    ylab = "Mean PSA_after / Mean PSA_before",
+    main = "Mean PSA Ratio by Treatment (High-Risk Patients)",
+    pch  = 16
+  )
+
+  axis(1, at = x, labels = psa_means$Treatment)
+
+
+  abline(lm_high, col = "red", lwd = 2)
+}
+
+```
