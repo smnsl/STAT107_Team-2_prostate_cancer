@@ -252,7 +252,7 @@ names(data) <- c("Patient ID", "Age", "PSA_before", "CTstage", "GleasonScore_bef
 ```
 
 
-### Visualization:
+### 3) Visualization:
   We use preliminary visualizations and numerical summaries in order to prepare and interpreting the two multivariate logistic regression models and one linear regression, as this step is essential for diagnosing data quality, identifying confounding factors, and assessing the signal strength before the formal statistical analysis begins. We’ve established a few bar graphs on the frequency of treatment type, frequency of biochemical recurrence status, survival status, and risk factors. The box plots on PSA level at diagnosis and after treatment will be used to directly confound our numerical data among different treatment groups, as well as interpreting information from risk factors through our numerical summary.
 
   
@@ -318,8 +318,12 @@ par(mfrow = c(1, 1))
 
 ```
  
-figure 2: Side-by-side bar plots for Biochemical Recurrence (BCR) and Survival Status to display the main outcomes. Preliminary findings suggest a differential effect of treatments on recurrence.
-  
+Figure 2: Side-by-side bar plots for Biochemical Recurrence (BCR) and Survival Status to display the main outcomes. 
+
+As shown in Figure 2, the data exhibit a low overall recurrence rate of Biochemical Recurrence (BCR), with the majority of patients (69.3%) successfully avoiding recurrence, which is represented as 'False'. However, the surprising and ironic cohort is Survival Status, where 0 = Alive and 1 = Deceased, showing that the survival rate is significantly low, with only 11.8% alive. 
+
+
+
 ```{r, echo=FALSE, results='hide', fig.width=9, fig.height=5}
 
 PSA <- c("PSA_before", "PSA_after")
@@ -338,12 +342,162 @@ boxplot(data[["PSA_after"]],
           col = "green")
 
 ```
-진찰시에는 수치가 높았는데 treatment 후에는 수치가 많이 줄었다.
+Figure 3: Comparison of PSA level before and after treatment on Diagnosis
 
 
-### Analysis aims:
+Figure 3 displays the distributions and central tendencies of Prostate-Specific Antigen (PSA) levels at the time of diagnosis and after primary treatment. The box plots and numerical summaries illustrate a significant and positive effect of the treatment modalities on reducing PSA levels in the cohort. Before treatment (PSA_before), the median PSA level was 59.35 ng/mL, with values ranging up to 150.00 ng/mL. Following treatment (PSA_after), the median level dropped dramatically to just 0.1900 ng/mL, with most values lying significantly below the pre-treatment range. This substantial decrease in both the median and quartiles (as evidenced by the significant drop from the 1st Quartile of 18.10 to 0.0400 indicates that the treatments were immediately successful in reducing the primary tumor burden and systemic PSA activity in the majority of patients. This observation aligns with clinical expectations, in which successful treatment should drive PSA levels to near-undetectable levels (nadir).
+
+
+### 4) Analysis aims:
 
   The main purpose of our analysis is to compare and quantify the long-term discriminatory effects of major first-line treatment methods for patients with prostate cancer. Some of the analyses we aim to complete will include linear regression models, box plot visualizations, R plots, and numerical summaries. We will apply statistical tests such as ANOVA and t-tests to compare treatment effectiveness across different clinical stages, Gleason scores, and recovery outcomes. If prostate cancer is less aggressive (lower Gleason score and early clinical stage), we expect surgery to yield the best outcomes due to its practicality and reduced long-term side effects compared to radiation or hormonal therapy. To test this, we will use box plots to visually compare recovery rates and PSA level reductions among treatment groups, followed by a one-way ANOVA to test for significant differences in mean recovery rates. We hypothesize that patients with localized, low-stage tumors (Stages 1–2) receiving surgery will have significantly higher recovery rates and lower recurrence probabilities. If the cancer is more aggressive or has metastasized, we hypothesize that hormonal therapy will be more effective because hormones circulate through the bloodstream and can target systemic tumor growth. A multivariate logistic regression model will be used to assess the relationship between treatment type and recurrence or metastasis, controlling for PSA level, tumor size, and patient age. For early-stage cancers (Stages 1–2), radiation therapy may also be effective as a minimally invasive treatment. We will visualize PSA levels and Gleason scores across radiation and surgery groups using box plots, and conduct a t-test to evaluate whether differences in mean PSA reduction between these groups are statistically significant. In advanced stages (Stages 3–4), a combination of hormonal and radiation therapy is expected to provide the best results. We will test this using multivariate logistic regression models for survival and recurrence outcomes, hypothesizing that combination therapy will be associated with the highest survival rates but also with greater treatment intensity and side effects. Overall, these analyses will allow us to statistically evaluate how treatment modality interacts with cancer aggressiveness, Gleason score, and clinical stage to influence recovery, recurrence, and long-term survival outcomes.
+  
+### 4-1) Chi-squared Test on Treatment vs. BCR
+
+H0: Treatment Type and Biochemical Recurrence (BCR) Status are independent. (The recurrence rate is the same across all treatment groups)
+Ha: Treatment Type and Biochemical Recurrence (BCR) Status are not independent. (The recurrence rate is significantly different for at least one treatment group)
+
+```{r, eco=FALSE, include=FALSE}
+
+bcr_table <- table(data$Treatment, data$BCR)
+cat("Frequency Table (Counts):\n")
+print(bcr_table)
+
+bcr_test <- chisq.test(bcr_table)
+cat("\nChi-squared Test Results:\n")
+print(bcr_test)
+
+cat("\nBCR Rate (%) within each Treatment Group:\n")
+round(prop.table(bcr_table, margin = 1) * 100, 1)
+
+```
+
+```{r, echo=FALSE}
+
+bcr_table <- table(data$Treatment, data$BCR)
+df_combined <- as.data.frame.matrix(bcr_table)
+
+df_combined$Total_Count <- rowSums(df_combined)
+
+bcr_rates_pct <- prop.table(bcr_table, margin = 1) * 100
+df_combined$No_Recurrence_Pct_False <- round(bcr_rates_pct[, "False"], 1)
+df_combined$Recurrence_Pct_True <- round(bcr_rates_pct[, "True"], 1)
+
+df_final <- df_combined[, c("False", "True", "No_Recurrence_Pct_False", "Recurrence_Pct_True")]
+df_final$Treatment_Type <- rownames(df_final)
+df_final <- df_final[, c(5, 1, 2, 3, 4)]
+names(df_final) <- c("Treatment Type",
+                     "Recurrence Count (False)",
+                     "Recurrence Count (True)", 
+                     "No Recurrence (%) (False)",
+                     "Recurrence (%) (True)")
+
+df_final %>%
+  kable(caption = "Association between Treatment Type and Biochemical Recurrence (BCR)", 
+        booktabs = TRUE,
+        linesep = "",
+        align = c('l', 'c', 'c', 'c', 'c')) %>% 
+  kable_styling(latex_options = "hold_position") %>%
+  column_spec(1, width = "1.8in") %>% # Treatment Type
+  column_spec(2:5, width = "0.8in")
+
+
+bcr_test <- chisq.test(bcr_table) 
+cat("\n\n")
+cat(paste0("Chi-squared = ", round(bcr_test$statistic, 4), ", df = ", bcr_test$parameter, ", p-value = ", round(bcr_test$p.value, 4)))
+
+```
+
+
+Since the p-value (0.0294) is less than the significance level (a=0.05), we reject the null hypothesis (H0). There is a statistically significant association between the type of treatment a patient receives and the likelihood of experiencing Biochemical Recurrence (BCR).
+
+Highest Recurrence Rate: Treatment Type 3 (Hormone Therapy (ADT) Monotherapy) showed the highest biochemical recurrence rate at 43.7%.
+
+Lowest Recurrence Rate: Treatment Type 1 (Radical Prostatectomy) showed the lowest recurrence rate at 25.6%.
+
+```{r, eco=FALSE}
+
+bcr_prop_table <- prop.table(bcr_table, margin = 1)
+
+par(mar = c(5, 4, 4, 10) + 0.1)
+barplot(
+  t(bcr_prop_table) * 100,
+  main = "Biochemical Recurrence (BCR) Rate by Treatment Type",
+  xlab = "Treatment Type",
+  ylab = "Percentage (%)",
+  col = c("blue", "red"),
+  legend.text = c("No Recurrence", "Recurrence"),
+  args.legend = list(
+    title = "Class", 
+    x = "topright",
+    inset = c(-0.5, 0),
+    xpd = TRUE,
+    cex = 0.8
+  ),
+  ylim = c(0, 100),
+  names.arg = c("RP", "RT", "ADT", "RT + ADT")
+)
+
+```
+
+
+### 4-2) Chi-squared Test on Treatment vs. Survival
+H0: Treatment Type and Survival Status are independent. (The survival rate is the same across all treatment groups)
+Ha: Treatment Type and Survival Status are not independent. (The survival rate is significantly different for at least one treatment group)
+
+```{r, eco=FALSE}
+
+survival_table <- table(data$Treatment, data$Survival)
+cat("Frequency Table (Counts):\n")
+print(survival_table)
+
+survival_test <- chisq.test(survival_table)
+cat("\nChi-squared Test Results:\n")
+print(survival_test)
+
+cat("\nSurvival Rate (%) within each Treatment Group (Survival = Alive):\n")
+round(prop.table(survival_table, margin = 1) * 100, 1)
+
+```
+
+Since the p-value (0.2034) is greater than the significance level (a=0.05), we fail to reject the null hypothesis (H0). There is no statistically significant association between the type of treatment a patient receives and the likelihood of their Survival Status (Alive vs Deceased).
+
+```{r, eco=FALSE}
+
+survival_prop_table <- prop.table(survival_table, margin = 1)
+
+par(mar = c(5, 4, 4, 10) + 0.1)
+barplot(
+  t(survival_prop_table) * 100,
+  main = "Survival Rate by Treatment Type",
+  xlab = "Treatment Type",
+  ylab = "Percentage (%)",
+  col = c("blue", "red"),
+  legend.text = c("Alive", "Deceased"),
+  args.legend = list(
+    title = "Class", 
+    x = "topright",
+    inset = c(-0.5, 0),
+    xpd = TRUE,
+    cex = 0.8
+  ),
+  ylim = c(0, 100),
+  names.arg = c("RP", "RT", "ADT", "RT + ADT")
+)
+
+```
+
+
+
+### 4-3) 
+
+
+### 4-4) 
+
+
+  
+### 5) Conclusion: 
+  
 
 
 ### Work Cited (Used in Abstract)
