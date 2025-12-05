@@ -9,8 +9,9 @@ output:
 
 
 ```{r setup, include=FALSE}
-library(knitr)
-library(kableExtra)
+
+source("00_requirements.R")
+
 ```
 
 
