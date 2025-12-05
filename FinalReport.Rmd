@@ -359,6 +359,13 @@ Figure 3 displays the distributions and central tendencies of Prostate-Specific 
   
 ### 4-1) Chi-squared Test on Treatment vs. BCR
 
+A Chi-squared test was performed to examine the association between Biochemical Recurrence (BCR) and treatment type.
+
+- Null Hypothesis (H0): Treatment Type and Biochemical Recurrence (BCR) Status are independent (The recurrence rate is the same across all treatment groups.)
+
+- Alternative Hypothesis (Ha): Treatment Type and Biochemical Recurrence (BCR) Status are not independent (The recurrence rate is significantly different for at least one treatment group.)
+
+
 ```{r, echo=FALSE}
 
 data$Treatment_Label <- factor(data$Treatment,
@@ -402,15 +409,9 @@ cat(paste0("Chi-squared = ", round(bcr_test$statistic, 4), ", df = ", bcr_test$p
 
 ```
 
-H0: Treatment Type and Biochemical Recurrence (BCR) Status are independent. (The recurrence rate is the same across all treatment groups)
+The Chi-squared test yielded a test statistic of chi^2 = 8.9915 with a corresponding p-value of 0.0294. Since the p-value is less than the significance level (alpha (a) = 0.05), we reject the null hypothesis. There is a statistically significant association between the type of treatment a patient receives and the likelihood of experiencing Biochemical Recurrence (BCR). 
 
-Ha: Treatment Type and Biochemical Recurrence (BCR) Status are not independent. (The recurrence rate is significantly different for at least one treatment group)
 
-Since the p-value (0.0294) is less than the significance level (a=0.05), we reject the null hypothesis (H0). There is a statistically significant association between the type of treatment a patient receives and the likelihood of experiencing Biochemical Recurrence (BCR).
-
-Highest Recurrence Rate: Treatment Type 3 (Hormone Therapy (ADT) Monotherapy) showed the highest biochemical recurrence rate at 43.7%.
-
-Lowest Recurrence Rate: Treatment Type 1 (Radical Prostatectomy) showed the lowest recurrence rate at 25.6%.
 
 ```{r, echo=FALSE}
 
@@ -437,8 +438,18 @@ barplot(
 
 ```
 
+Hormone Monotherapy had the highest recurrence rate at 43.7%, while Radical Prostatectomy had the lowest at 25.6%. The bar plot visually confirms this, with the red recurrence portion for Hormone Monotherapy (ADT) notably larger and the recurrence portion for Radical Prostatectomy (RP) noticeably smaller compared to other treatment methods.
+
+
 
 ### 4-2) Chi-squared Test on Treatment vs. Survival
+
+A Chi-squared test was performed to examine the association between Biochemical Recurrence (BCR) and treatment type.
+
+- Null Hypothesis (H0): Treatment Type and Biochemical Recurrence (BCR) Status are independent (The survival  rate is the same across all treatment groups.)
+
+- Alternative Hypothesis (Ha): Treatment Type and Biochemical Recurrence (BCR) Status are not independent (The survival rate is significantly different for at least one treatment group.)
+
 
 ```{r, echo=FALSE}
 
@@ -484,11 +495,8 @@ cat(paste0("Chi-squared = ", round(survival_test$statistic, 4), ", df = ", survi
 
 ```
 
+The Chi-squared test yielded a test statistic of chi^2 = 4.6021 with a corresponding p-value of 0.2034. Since the p-value is greater than the significance level (alpha (a) =0.05), we fail to reject the null hypothesis (H0). Therefore, we can conclude that there is no statistically significant association between the type of treatment a patient receives and the likelihood of their Survival Status (Alive vs. Deceased). The bar plot also supports this conclusion, showing that the distribution of survival rates is not substantially different across the four treatment types.
 
-H0: Treatment Type and Survival Status are independent. (The survival rate is the same across all treatment groups)
-Ha: Treatment Type and Survival Status are not independent. (The survival rate is significantly different for at least one treatment group)
-
-Since the p-value (0.2034) is greater than the significance level (a=0.05), we fail to reject the null hypothesis (H0). There is no statistically significant association between the type of treatment a patient receives and the likelihood of their Survival Status (Alive vs Deceased).
 
 ```{r, echo=FALSE}
 
@@ -515,60 +523,70 @@ barplot(
 
 ```
 
+The bar plot also supports this conclusion, showing that the survival rate distribution is not substantially different across the four treatment types.
+
+
 ### 4-3) ANOVA Test, Treatment vs PSA Difference
+
+An ANOVA was conducted to compare mean PSA at diagnosis (PSA_before) across the four Treatment Type groups.
+
+- Null Hypothesis (H0): PSA at diagnosis is the same across all four Treatment Type groups
+
+- Alternative Hypothesis (Ha): Alternative Hypothesis (H1)는 PSA at diagnosis is significantly different for at least one treatment group
 
 ```{r, echo=FALSE}
 
+suppressWarnings({
+
 mean_psa_df <- data.frame(
-  Treatment_Type = c("1 (Surgery)", "2 (RT)", "3 (Hormone Therapy)", "4 (RT + Hormone)"),
+  Treatment_Type = c("Radical Prostatectomy", "Radiotherapy (RT)", "Hormone Monotherapy", "Combination (RT + Hormone)"),
   Mean_Delta_PSA = c(53.905, 68.503, 83.659, 70.428)
 )
 
 mean_psa_df %>%
-  kable(caption = "Mean PSA Reduction (Delta PSA) by Treatment Type",
-        booktabs = TRUE,
-        linesep = "",
-        col.names = c("Treatment Type",
-                      "Mean Reduction (PSA_before - PSA_after)"),
-        align = c('l', 'r')) %>%
+  kable(caption = "Table 4.4: Mean PSA Reduction (Delta PSA) by Treatment Type", 
+    booktabs = TRUE,
+    linesep = "",
+    col.names = c("Treatment Type",
+    "Mean Reduction (PSA_before - PSA_after)"),
+    align = c('l', 'r')) %>%
   kable_styling(latex_options = c("hold_position", "scale_down"), full_width = FALSE) %>%
-  column_spec(1, width = "1.8in")
+  column_spec(1, width = "2.0in") %>% # 레이블 길이에 맞게 너비 지정
+  column_spec(2, width = "1.5in")
 
 
 tukey_data <- data.frame(
-  Group_1 = c("1 (Surgery)", "1 (Surgery)", "1 (Surgery)", "2 (RT)", "2 (RT)", "3 (Hormone Therapy)"),
-  Group_2 = c("2 (RT)", "3 (Hormone Therapy)", "4 (RT + Hormone)", "3 (Hormone Therapy)", "4 (RT + Hormone)", "4 (RT + Hormone)"),
+  Group_1 = c("Radical Prostatectomy", "Radical Prostatectomy", "Radical Prostatectomy", 
+              "Radiotherapy (RT)", "Radiotherapy (RT)", "Hormone Monotherapy"),
+  Group_2 = c("Radiotherapy (RT)", "Hormone Monotherapy", "Combination (RT + Hormone)", 
+              "Hormone Monotherapy", "Combination (RT + Hormone)", "Combination (RT + Hormone)"),
   Mean_Difference = c(14.598, 29.754, 16.523, 15.157, 1.925, -13.232),
   p_value = c(0.0056, 0.0000, 0.0151, 0.0821, 0.9874, 0.2536),
   Significant = c("Yes", "Yes", "Yes", "No", "No", "No")
 )
 
 tukey_data %>%
-  kable(caption = "Table 4.3: Tukey's HSD Post-Hoc Test for Delta PSA",
-        booktabs = TRUE,
-        linesep = "",
-        col.names = c("Group 1", "Group 2", "Mean Difference", "p-value", "Significant (p < 0.05)"),
-        align = c('l', 'l', 'r', 'r', 'c')) %>%
+  kable(caption = "Table 4.5: Tukey's HSD Post-Hoc Test for Delta PSA", # Table 4.5로 변경
+      booktabs = TRUE,
+      linesep = "",
+    col.names = c("Group 1", "Group 2", "Mean Diff.", "p-value", "Sig. (p < 0.05)"), 
+    align = c('l', 'l', 'r', 'r', 'c')) %>%
   kable_styling(latex_options = c("hold_position", "scale_down"), full_width = FALSE) %>%
-  column_spec(1:2, width = "1.4in") %>% 
-  column_spec(3:5, width = "0.7in")
+  column_spec(1:2, width = "1.6in") %>%
+  column_spec(3:5, width = "0.6in")
+
+})
 
 ```
 
+The ANOVA test yielded a p-value of 1.6e-6 (0.0000016). Since the p-value is much less than the significance level (alpha (a) =0.05), we reject the null hypothesis (H0). Thus, there is a statistically significant difference in the mean PSA at diagnosis (PSA_before) among the different treatment groups.
 
-H0: The mean change in PSA (Delta PSA) is the same across all four Treatment Type groups
+Since the ANOVA test confirmed a significant difference, a Tukey HSD post hoc test was performed to identify which specific pairs of groups differ significantly.
 
-Ha: The mean change in PSA (Delta PSA) is significantly different for at least one treatment group
+The mean PSA at diagnosis for the Radical Prostatectomy (Treatment 1) group is significantly lower than that for all other treatment groups (Treatment 2, 3, and 4). There is no significant difference in the mean PSA at diagnosis among the three non-surgical groups (Treatment 2, 3, and 4) in their pairwise comparisons. The comparison between Hormone Therapy Monotherapy (Treatment 3) and Radical Prostatectomy (Treatment 1) showed the most considerable mean difference (diff = 30.21). This indicates that the Treatment 3 group had the highest average PSA at diagnosis, whereas the Treatment 1 group had the lowest.
 
-Since the p-value (2.66e-06) is less than the significance level (a=0.05), we reject the null hypothesis (H0). There is a statistically significant difference in the mean change in PSA (Delta PSA) among the different treatment groups.
 
-The mean PSA change (Delta PSA, where a larger value indicates a greater reduction) in the Radical Prostatectomy (Treatment 1) group is significantly smaller than the mean change in all other treatment groups (2, 3, and 4).
-
-Largest Mean Difference: Treatment 3 (Hormone Therapy Monotherapy) showed the largest positive mean difference (Delta PSA = 29.755) compared to Treatment 1, indicating the greatest average PSA reduction after treatment.
-
-No Significant Difference: There is no significant difference in the mean PSA Difference among the three non-surgical groups (Treatment 2, 3, and 4).
-
-```{r}
+```{r, echo=FALSE}
 
 par(mar = c(5, 4, 4, 2) + 0.1)
 boxplot(PSA_before ~ Treatment,
@@ -585,6 +603,8 @@ points(means, pch = 8, col = "black", cex = 1.5)
 
 
 ```
+The box plot visually confirms these findings: the PSA distribution for the Radical Prostatectomy (RP) group is noticeably lower than that of all other groups, and its mean value (often marked by a symbol) is the lowest. Conversely, the distribution and mean value for the Hormone Monotherapy (ADT) group are distinctly higher than those for the RP group, visually confirming that patients selected for RP had the lowest initial PSA levels at diagnosis.
+
 
   
 ### 5) Conclusion: 

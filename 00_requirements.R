@@ -4,6 +4,18 @@ if (!require(tidyverse)) {      ## If package is not installed
   library(tidyverse)            ## Load package to environment.
 }
 
+# knitr
+if (!require(knitr)) {      
+  install.packages("knitr") 
+  library(knitr)            
+}
+
+# kableExtra
+if (!require(kableExtra)) {      
+  install.packages("kableExtra") 
+  library(kableExtra)            
+}
+
 
 # knitr
 if (!require(knitr)) {
