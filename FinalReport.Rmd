@@ -9,6 +9,7 @@ output:
 
 
 ```{r setup, include=FALSE}
+
 library(knitr)
 library(kableExtra)
 
@@ -392,7 +393,7 @@ df_final %>%
         linesep = "",
         align = c('l', 'c', 'c', 'c', 'c')) %>% 
   kable_styling(latex_options = "hold_position") %>%
-  column_spec(1, width = "1.8in") %>% # Treatment Type
+  column_spec(1, width = "1.8in") %>% 
   column_spec(2:5, width = "0.8in")
 
 
@@ -474,7 +475,9 @@ df_final_s %>%
                       "Count (Alive)", "Count (Deceased)", 
                       "Survival (%)", "Mortality (%)"),
         align = c('l', 'c', 'c', 'c', 'c')) %>% 
-  kable_styling(latex_options = c("hold_position", "scale_down"))
+  kable_styling(latex_options = "hold_position") %>%
+  column_spec(1, width = "1.8in") %>% 
+  column_spec(2:5, width = "0.8in")
 
 survival_test <- chisq.test(survival_table) 
 cat("\n\n")
@@ -529,7 +532,8 @@ mean_psa_df %>%
         col.names = c("Treatment Type",
                       "Mean Reduction (PSA_before - PSA_after)"),
         align = c('l', 'r')) %>%
-  kable_styling(latex_options = "hold_position")
+  kable_styling(latex_options = c("hold_position", "scale_down"), full_width = FALSE) %>%
+  column_spec(1, width = "1.8in")
 
 
 tukey_data <- data.frame(
@@ -546,7 +550,9 @@ tukey_data %>%
         linesep = "",
         col.names = c("Group 1", "Group 2", "Mean Difference", "p-value", "Significant (p < 0.05)"),
         align = c('l', 'l', 'r', 'r', 'c')) %>%
-  kable_styling(latex_options = c("hold_position", "scale_down"))
+  kable_styling(latex_options = c("hold_position", "scale_down"), full_width = FALSE) %>%
+  column_spec(1:2, width = "1.4in") %>% 
+  column_spec(3:5, width = "0.7in")
 
 ```
 
@@ -563,10 +569,23 @@ Largest Mean Difference: Treatment 3 (Hormone Therapy Monotherapy) showed the la
 
 No Significant Difference: There is no significant difference in the mean PSA Difference among the three non-surgical groups (Treatment 2, 3, and 4).
 
+```{r}
+
+par(mar = c(5, 4, 4, 2) + 0.1)
+boxplot(PSA_before ~ Treatment,
+        data = data,
+        main = "PSA at Diagnosis Distribution by Treatment Type",
+        xlab = "Treatment Type",
+        ylab = "PSA at diagnosis",
+        col = rainbow(4),
+        names = c("RP", "RT", "ADT", "RT + ADT")
+)
+
+means <- tapply(data$PSA_before, data$Treatment, mean, na.rm=TRUE)
+points(means, pch = 8, col = "black", cex = 1.5)
 
 
-### 4-4) 
-
+```
 
   
 ### 5) Conclusion: 
