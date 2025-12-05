@@ -17,116 +17,6 @@ summary(data)
 
 ```
 
-
-
-## Dataset Variables
-
-
-### Initial Diagnosis
-
-
-**Hasta_ID (Categorical)**: Patient ID
-
-
-**Yas (Discrete)**: Age
-
-
-**Tani_Tarihi (Date)**:	Diagnosis Date
-
-
-**PSA_Tani (Continuous)**: Serum Prostate-Specific Antigen (PSA) level at diagnosis (ng/mL)
-
-
-**Klinik_Evre	(Ordinal/Categorical)**: Clinical cT-Stage determined by pre-treatment examinations (cT1c < cT2a < cT2b < cT2c < cT3a < cT3b for increasing extent of tumor invasion)
-
-
-**Biyopsi_Gleason	(Ordinal/Categorical)**: Biopsy Gleason Score (3+3 < 3+4 < 4+3 < 3+5 < 4+4 < 4+5 < 5+4 < 5+5, higher score indicates higher aggressiveness)
-
-
-**Risk_Grubu (Ordinal/Categorical)**: Risk Group Classification (1 for Low, 2 for Intermediate, 3 forHigh)	
-
-
-### Risk Factors
-
-
-**Albumin	(Continuous)**: ASerum albumin level (g/dL). Indicator of nutritional status and systemic health
-
-
-**Lenfosit (Discrete)**: Lymphocyte (Immune system component) Count
-
-
-**CRP (Continuous)**: C-Reactive Protein (mg/L). Indicator of inflammation
-
-
-**NLR	(Continuous)**: Neutrophil-to-Lymphocyte Ratio. A prognostic indicator for systemic inflammation and cancer aggressiveness.
-
-
-**CALLY_Index	(Continuous)**: CALLY Index. A composite index, likely related to inflammation or blood components.
-
-
-**Komorbidite_Skor (Ordinal/Categorical)**: Comorbidity Score indicating the severity of other co-existing chronic diseases ( 0 (No comorbidities) < ... < 5 (Severe comorbidities))
-
-
-### Treatment Information
-
-
-**Tedavi_Tipi	(Categorical)**: Main Treatment Type received (1 for Radical Prostatectomy, 2 for Radiotherapy/RT, 3 for Hormone Therapy, 4 for Combination of Radiotherapy and Hormone Therapy)
-
-
-**Tedavi_Tarihi	(Date)**: Treatment Date
-
-
-**RT_Dozu (Continuous)**: Total Radiation Dose (in Gy), if radiotherapy was performed
-
-
-**ADT_Tipi (Categorical)**: Androgen Deprivation Therapy (ADT, hormone therapy) Type used
-
-
-**ADT_Suresi (Continuous)**: ADT(hormone therapy) Duration
-
-
-### Pathological Markers
-
-
-**Patolojik_Evre (Ordinal/Categorical)**: Final Tumor Pathological Stage determined after surgery on the removed tissue (pT2a < pT2b < pT2c < pT3a < pT3b < pT4, NaN indicates patient did not undergo surgery)
-
-
-**Cerrahi_Sinir	(Binary/Categorical)**: Surgical Margin Status indicating if cancer cells were present at the edge of the removed tissue. Crucial for recurrence prediction (0: Negative, 1: Positive, NaN indicates patient did not undergo surgery). 
-
-
-**Final_Gleason	(Ordinal/Categorical)**: Final Gleason Score confirmed from the final excised tissue (3+3 < 3+4 < 4+3 < 3+5 < 4+4 < 4+5 < 5+4 < 5+5, higher score indicates higher aggressiveness)
-
-
-### Follow-up & Outcomes
-
-
-**PSA_Nadir	(Continuous)**: The lowest PSA level reached after treatment (ng/mL). A lower nadir generally indicates better treatment success
-
-
-**PSA_Takip_3ay / 6ay / 12ay (Continuous)**: Follow-up PSA levels (ng/mL) measured at at 3/6/12 Months
-
-
-**BCR_Durum (Binary/Categorical)**: Biochemical Recurrence (BCR) Status	whether the PSA level rise above a recurrence threshold? (True for Recurrence occurred, False for no Recurrence occurred)
-
-
-**BCR_Tarihi (Date)**: Date when biochemical recurrence was confirmed
-
-
-**Metastaz_Durum (Binary/Categorical)**: Metastasis Status whether distant metastasis occur during follow-up? (0 for No, 1 for Yes)
-
-
-**Metastaz_Tarihi	(Date)**: Date when metastasis was confirmed
-
-
-**Son_Durum	(Binary/Categorical)**: Patient's Survival Status at the last follow-up (0 for Alive, 1 for Deceased)
-
-
-**Son_Takip_Tarihi (Date)**: Date of the last recorded patient information.
-
-
-
-## Data handling 1: Remove variables that we will not use for analysis
-
 ```{r}
 
 cols1 <- c("Tani_Tarihi", "Tedavi_Tarihi", "PSA_Takip_3ay", "PSA_Takip_6ay", "PSA_Takip_12ay", "BCR_Tarihi", "Metastaz_Tarihi", "Son_Takip_Tarihi")
@@ -134,10 +24,6 @@ cols1 <- c("Tani_Tarihi", "Tedavi_Tarihi", "PSA_Takip_3ay", "PSA_Takip_6ay", "PS
 data <- data[, !(names(data) %in% cols1)]
 
 ```
-
-
-
-## Data handling 2: Turning all categorical variables to factors
 
 ```{r}
 
@@ -147,155 +33,14 @@ data[cols2] <- lapply(data[cols2], as.factor)
 
 ```
 
-
-
-## Data handling 3: Changing variable names
-
 ```{r}
 
 names(data) <- c("Patient ID", "Age", "PSA_before", "CTstage", "GleasonScore_before", "RiskClass", "Albumin", "Lymphocyte", "CRP", "NLR", "CallyIndex", "ComorbidityScore", "Treatment", "RadiationDose", "HormoneType", "HormonDuration" ,"TumorSize", "MarginStatus", "GleasonScore_after", "PSA_after", "BCR", "Metastasis", "Survival")
 
 ```
 
-```{r}
-
-str(data)
-
-```
 
 
-
-## Data Visualization 1: Frequency of Treatment Type (Treatment)
-
-```{r}
-
-sum(is.na(data$Treatment))
-
-table(data$Treatment)
-round(prop.table(table(data$Treatment)), 3)
-
-frequencies <- table(data$Treatment)
-barplot(
-    frequencies,
-    main = "Frequency of Treatment Type (Treatment)",
-    xlab = "Treatment Type",
-    ylab = "Number of Patients",
-    col = rainbow(4),
-    ylim = c(0, max(frequencies) * 1.1)
-    )
-
-```
-
-
-
-## Data Visualization 2: Frequency of Biochemical Recurrence Status (BCR)
-
-```{r}
-
-sum(is.na(data$BCR))
-
-table(data$BCR)
-round(prop.table(table(data$BCR)), 3)
-
-frequencies <- table(data$BCR)
-barplot(
-    frequencies,
-    main = "Frequency of Biochemical Recurrence Status",
-    xlab = "Recurrence Status",
-    ylab = "Number of Patients",
-    col = c("blue", "red"),
-    ylim = c(0, max(frequencies) * 1.1)
-    )
-
-```
-
-
-
-## Data Visualization 3: Frequency of Survival Status (Survival)
-
-```{r}
-
-sum(is.na(data$Survival))
-
-table(data$Survival)
-round(prop.table(table(data$Survival)), 3)
-
-frequencies <- table(data$Survival)
-barplot(
-    frequencies,
-    main = "Frequency of Survival Status",
-    xlab = "Survival Status",
-    ylab = "Number of Patients",
-    col = c("blue", "red"),
-    ylim = c(0, max(frequencies) * 1.1)
-    )
-
-```
-
-
-
-## Data Visualization 4: Serum Prostate-Specific Antigen (PSA) level at diagnosis & after treatment
-
-```{r}
-
-PSA <- c("PSA_before", "PSA_after")
-sapply(data[, PSA], function(x) sum(is.na(x)))
-
-summary(data[, PSA])
-
-par(mfrow = c(1, 2))
-
-boxplot(data[["PSA_before"]],
-          main = "Box Plot of PSA level at diagnosis",
-          col = "grey")
-
-boxplot(data[["PSA_after"]],
-          main = "Box Plot of PSA level after treatment",
-          col = "green")
-
-```
-
-
-The PSA level significantly decreased after treatment.
-
-
-## Data Visualization 5: Summary & Boxplots, Barplot of Risk Factors
-
-```{r}
-
-risk_factors <- c("Albumin", "Lymphocyte", "CRP", "NLR", "CallyIndex", "ComorbidityScore")
-sapply(data[, risk_factors], function(x) sum(is.na(x)))
-
-summary(data[, risk_factors])
-
-continuous_risks <- c("Albumin", "CRP", "NLR", "CallyIndex")
-plot_colors <- rainbow(4)
-
-par(mfrow = c(1,4))
-
-for (i in 1:length(continuous_risks)) {
-  var_name <- continuous_risks[i]
-  var_data <- data[[var_name]]
-  
-  boxplot(var_data,
-          main = paste("Box Plot of", var_name),
-          ylab = var_name,
-          col = plot_colors[i])
-}
-
-par(mfrow = c(1,1))
-
-frequencies <- table(data$ComorbidityScore)
-barplot(
-    frequencies,
-    main = "Frequency of Comorbidity Score (ComorbidityScore)",
-    xlab = "Comorbidity Score",
-    ylab = "Number of Patients",
-    col = rainbow(6),
-    ylim = c(0, max(frequencies) * 1.1)
-    )
-
-```
 ## Analysis Aim 1: Multivariate Logistic Regression model of best treatment type for preventing recurrence
 
 ```{r}

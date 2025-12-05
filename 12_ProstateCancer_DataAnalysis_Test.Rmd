@@ -9,9 +9,6 @@ output: pdf_document
 ```{r, eco=FALSE}
 
 data <- read.csv("00_ProstateCancer_Data.csv", header=T)
-head(data)
-str(data)
-summary(data)
 
 ```
 
