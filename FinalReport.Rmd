@@ -357,7 +357,7 @@ Figure 3 displays the distributions and central tendencies of Prostate-Specific 
 
 ## PART A) TEST
   
-### 4-1) Chi-squared Test on Treatment vs. BCR
+### 4A-1) Chi-squared Test on Treatment vs. BCR
 
 A Chi-squared test was performed to examine the association between Biochemical Recurrence (BCR) and treatment type.
 
@@ -442,7 +442,7 @@ Hormone Monotherapy had the highest recurrence rate at 43.7%, while Radical Pros
 
 
 
-### 4-2) Chi-squared Test on Treatment vs. Survival
+### 4A-2) Chi-squared Test on Treatment vs. Survival
 
 A Chi-squared test was performed to examine the association between Biochemical Recurrence (BCR) and treatment type.
 
@@ -526,7 +526,7 @@ barplot(
 The bar plot also supports this conclusion, showing that the survival rate distribution is not substantially different across the four treatment types.
 
 
-### 4-3) ANOVA Test, Treatment vs PSA Difference
+### 4A-3) ANOVA Test, Treatment vs PSA Difference
 
 An ANOVA was conducted to compare mean PSA at diagnosis (PSA_before) across the four Treatment Type groups.
 
@@ -609,11 +609,40 @@ The box plot visually confirms these findings: the PSA distribution for the Radi
 
 ## Data Analysis 0: Correlation between Variables
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.width=10, fig.height=10, warning=FALSE, message=FALSE}
 
-vars <- c("Age", "PSA_before", "CTstage", "GleasonScore_before", "Albumin", "Lymphocyte", "CRP", "NLR", "CallyIndex", "ComorbidityScore")
+options(warn = -1)
 
-pairs(data[, vars])
+plot_vars <- c("Age", "PSA_before", "CTstage", "GleasonScore_before", 
+               "Albumin", "Lymphocyte", "CRP", "NLR", "CallyIndex", 
+               "ComorbidityScore", "BCR") 
+
+plot_data <- na.omit(data[, plot_vars])
+
+columns_to_plot <- 1:10
+
+ggpairs(
+    data = plot_data,
+    columns = columns_to_plot,
+
+    mapping = aes(color = BCR, alpha = 0.5), 
+    title = "Pairwise Relationship Matrix of Patient Clinical Variables (Colored by BCR Status)",
+
+    lower = list(continuous = wrap("points", size = 0.8)), 
+
+    diag = list(
+        continuous = wrap("densityDiag", alpha = 0.6), 
+        discrete = wrap("barDiag")                     
+    ),
+    
+    combo = list(continuous = wrap("box", alpha = 0.7)),
+    upper = list(
+        continuous = wrap("cor", size = 4, method="spearman", family="sans"), 
+        combo = wrap("box", alpha = 0.7) 
+    ),
+    
+    ggplot2::theme_bw(base_size = 12)
+)
 
 ```
 
