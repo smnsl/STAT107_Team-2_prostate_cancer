@@ -167,40 +167,31 @@ test_probabilities <- predict(bcr_model_train, newdata = test_set, type = "respo
 
 train_probabilities <- predict(bcr_model_train, newdata = train_set, type = "response")
 
+# Train AUC
 roc_obj_train <- roc(train_set$BCR, train_probabilities)
 auc_score_train <- auc(roc_obj_train)
+cat(sprintf("AUC (Area Under the Curve, Train Set): %.4f\n", auc_score_train))
 
+# Test AUC
 roc_obj <- roc(test_set$BCR, test_probabilities)
 auc_score <- auc(roc_obj)
+cat(sprintf("AUC (Area Under the Curve): %.4f\n", auc_score))
 
 par(mfrow = c(1, 2))
 
+# Train ROC
 plot(roc_obj_train, 
-     main = "ROC Curve for Training Set",
+     main = "ROC Curve for Training Set (Oversampling)",
      xlab = "False Positive Rate (1 - Specificity)", 
      ylab = "True Positive Rate (Sensitivity)",
      lwd = 3)
 
+# Test ROC
 plot(roc_obj, 
-     main = "ROC Curve for BCR Test Model",
+     main = "ROC Curve for BCR Prediction Model (Oversampling)",
      xlab = "False Positive Rate (1 - Specificity)", 
      ylab = "True Positive Rate (Sensitivity)",
      lwd = 3)
-
-auc_results <- data.frame(
-  Dataset = c("Training Set", "Test Set"),
-  AUC = c(
-    sprintf("%.4f", auc_score_train), 
-    sprintf("%.4f", auc_score)
-  )
-)
-
-auc_results %>%
-  knitr::kable(
-    caption = "Model Performance: Area Under the Curve (AUC)",
-    format = "latex", 
-    align = c('l', 'r') 
-  )
 
 ```
 
@@ -213,42 +204,15 @@ test_predictions <- ifelse(test_probabilities > 0.5, "True", "False")
 conf_matrix <- table(Predicted = test_predictions, Actual = test_set$BCR)
 conf_matrix <- conf_matrix[, c("False", "True")]
 
+cat("Confusion Matrix (Threshold 0.5):\n")
+print(conf_matrix)
+
 accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
 sensitivity <- conf_matrix["True", "True"] / sum(conf_matrix[, "True"])
 specificity <- conf_matrix["False", "False"] / sum(conf_matrix[, "False"])
 
-conf_df <- as.data.frame.matrix(conf_matrix)
-conf_df <- tibble::rownames_to_column(conf_df, var = "Predicted") %>%
-  rename(`Actual (BCR=False)` = False, `Actual (BCR=True)` = True)
-
-conf_df %>%
-  kable(
-    caption = "Confusion Matrix (Threshold 0.5)",
-    col.names = c("Predicted", "False", "True"),
-    booktabs = TRUE,
-    align = 'c'
-  ) %>%
-  add_header_above(c(" " = 1, "Actual Status" = 2)) %>%
-  kable_styling(
-    latex_options = c("hold_position"), 
-    full_width = FALSE
-  )
-
-metrics_df <- data.frame(
-  Metric = c("Accuracy", "Sensitivity", "Specificity"),
-  Value = c(accuracy, sensitivity, specificity)
-) %>%
-  mutate(Value = sprintf("%.4f", Value))
-
-metrics_df %>%
-  kable(
-    caption = "Performance Metrics (Threshold 0.5)",
-    booktabs = TRUE,
-    align = c('l', 'c')
-  ) %>%
-  kable_styling(
-    latex_options = c("hold_position"), 
-    full_width = FALSE
-  )
+cat(sprintf("   Accuracy: %.4f\n", accuracy))
+cat(sprintf("   Sensitivity: %.4f\n", sensitivity))
+cat(sprintf("   Specificity: %.4f\n", specificity))
 
 ```
