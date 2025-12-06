@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.12.3)  5 DEC 2025 19:59
+This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.12.3)  5 DEC 2025 20:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -597,7 +597,7 @@ File: bkm-dvipdfm.def 2023-12-10 v1.31 bookmark driver for dvipdfm (HO)
 \BKM@id=\count347
 )) (./FinalReport.aux
 
-LaTeX Warning: Label `tab:unnamed-chunk-25' multiply defined.
+LaTeX Warning: Label `tab:unnamed-chunk-35' multiply defined.
 
 )
 \openout1 = `FinalReport.aux'.
@@ -958,7 +958,7 @@ ignored error: Infinite glue shrinkage found in box being split [9]
 File: FinalReport_files/figure-latex/unnamed-chunk-15-1.pdf Graphic file (type pdf)
 <use FinalReport_files/figure-latex/unnamed-chunk-15-1.pdf>
 
-Underfull \hbox (badness 10000) in paragraph at lines 435--445
+Underfull \hbox (badness 10000) in paragraph at lines 434--444
 [][]
  []
 
@@ -966,45 +966,35 @@ Underfull \hbox (badness 10000) in paragraph at lines 435--445
 File: FinalReport_files/figure-latex/unnamed-chunk-16-1.pdf Graphic file (type pdf)
 <use FinalReport_files/figure-latex/unnamed-chunk-16-1.pdf>
 [11]
-File: FinalReport_files/figure-latex/unnamed-chunk-17-1.pdf Graphic file (type pdf)
-<use FinalReport_files/figure-latex/unnamed-chunk-17-1.pdf>
-
-Underfull \hbox (badness 10000) in paragraph at lines 522--533
-[][]
- []
-
-[12] [13]
-File: FinalReport_files/figure-latex/unnamed-chunk-18-1.pdf Graphic file (type pdf)
-<use FinalReport_files/figure-latex/unnamed-chunk-18-1.pdf>
-[14]
 File: FinalReport_files/figure-latex/unnamed-chunk-19-1.pdf Graphic file (type pdf)
 <use FinalReport_files/figure-latex/unnamed-chunk-19-1.pdf>
-[15]
-File: FinalReport_files/figure-latex/unnamed-chunk-20-1.pdf Graphic file (type pdf)
-<use FinalReport_files/figure-latex/unnamed-chunk-20-1.pdf>
-
-Underfull \hbox (badness 10000) in paragraph at lines 650--660
-[][]
- []
-
-[16] [17] [18]
+File: FinalReport_files/figure-latex/unnamed-chunk-22-1.pdf Graphic file (type pdf)
+<use FinalReport_files/figure-latex/unnamed-chunk-22-1.pdf>
+[12]
+File: FinalReport_files/figure-latex/unnamed-chunk-25-1.pdf Graphic file (type pdf)
+<use FinalReport_files/figure-latex/unnamed-chunk-25-1.pdf>
+File: FinalReport_files/figure-latex/unnamed-chunk-28-1.pdf Graphic file (type pdf)
+<use FinalReport_files/figure-latex/unnamed-chunk-28-1.pdf>
+[13] [14] [15]
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 7.0pt on input line 839.
+(Font)              scaled to size 7.0pt on input line 557.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 5.0pt on input line 839.
+(Font)              scaled to size 5.0pt on input line 557.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 10.00092pt on input line 839.
+(Font)              scaled to size 10.00092pt on input line 557.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 7.00064pt on input line 839.
+(Font)              scaled to size 7.00064pt on input line 557.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 5.00046pt on input line 839.
+(Font)              scaled to size 5.00046pt on input line 557.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 9.99893pt on input line 839.
+(Font)              scaled to size 9.99893pt on input line 557.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 6.99925pt on input line 839.
+(Font)              scaled to size 6.99925pt on input line 557.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 4.99947pt on input line 839.
-[19] [20] (./FinalReport.aux)
+(Font)              scaled to size 4.99947pt on input line 557.
+File: FinalReport_files/figure-latex/unnamed-chunk-34-1.pdf Graphic file (type pdf)
+<use FinalReport_files/figure-latex/unnamed-chunk-34-1.pdf>
+ignored error: Infinite glue shrinkage found in box being split [16] [17] (./FinalReport.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-11-14>
@@ -1014,12 +1004,12 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 18466 strings out of 470195
- 339989 string characters out of 5477186
- 906152 words of memory out of 5000000
- 46791 multiletter control sequences out of 15000+600000
+ 18479 strings out of 470195
+ 340578 string characters out of 5477186
+ 904153 words of memory out of 5000000
+ 46803 multiletter control sequences out of 15000+600000
  634222 words of font info for 87 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 90i,7n,114p,1445b,524s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 90i,9n,114p,1445b,468s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on FinalReport.pdf (20 pages).
+Output written on FinalReport.pdf (17 pages).

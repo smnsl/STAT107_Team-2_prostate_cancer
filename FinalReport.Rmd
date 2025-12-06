@@ -562,8 +562,7 @@ tukey_data <- data.frame(
 )
 
 tukey_data %>%
-  kable(caption = "Table 4.5: Tukey's HSD Post-Hoc Test for Delta PSA", # Table 4.5로 변경
-      booktabs = TRUE,
+  kable(booktabs = TRUE,
       linesep = "",
     col.names = c("Group 1", "Group 2", "Mean Diff.", "p-value", "Sig. (p < 0.05)"), 
     align = c('l', 'l', 'r', 'r', 'c')) %>%
@@ -802,30 +801,41 @@ Finally, we evaluated the predictive performance of the reduced BCR model. The d
 
 ### Evaluating: AUC (Area Under the Curve)
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 
 train_probabilities <- predict(bcr_model_train, newdata = train_set, type = "response")
 
-# Train AUC
 roc_obj_train <- roc(train_set$BCR, train_probabilities)
 auc_score_train <- auc(roc_obj_train)
-cat(sprintf("AUC (Area Under the Curve, Train Set): %.4f\n", auc_score_train))
 
-# Test AUC
 roc_obj <- roc(test_set$BCR, test_probabilities)
 auc_score <- auc(roc_obj)
-cat(sprintf("AUC (Area Under the Curve): %.4f\n", auc_score))
+
+auc_results <- data.frame(
+  Dataset = c("Training Set (Oversampled)", "Test Set"),
+  AUC = c(
+    sprintf("%.4f", auc_score_train), 
+    sprintf("%.4f", auc_score)
+  )
+)
+
+auc_results %>%
+  knitr::kable(
+    caption = "Model Performance: Area Under the Curve (AUC)",
+    format = "latex", 
+    align = c('l', 'r') 
+  )
+
 
 par(mfrow = c(1, 2))
 
-# Train ROC
 plot(roc_obj_train, 
      main = "ROC Curve for Training Set (Oversampling)",
      xlab = "False Positive Rate (1 - Specificity)", 
      ylab = "True Positive Rate (Sensitivity)",
      lwd = 3)
 
-# Test ROC
+
 plot(roc_obj, 
      main = "ROC Curve for BCR Prediction Model (Oversampling)",
      xlab = "False Positive Rate (1 - Specificity)", 
