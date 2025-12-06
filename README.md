@@ -1,4 +1,4 @@
-# STAT107-team2
+# STAT107_Team#2
 
 This repository contains all the necessary files for submissions. Below is a short description of each file.
 
@@ -21,8 +21,5 @@ This repository contains all the necessary files for submissions. Below is a sho
 
 
 Final Report: Written with title and brief abstract, introduction, data, visualization, and analysis for our project. 
-
-
-Team_Member_Evaluation: Summarization of each member's contribution on this project. 
 
 
