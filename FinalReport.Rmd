@@ -654,18 +654,35 @@ To evaluate which treatment type appears best for preventing biochemical recurre
 
 bcr_model <- glm(BCR ~ Age + PSA_before + CTstage + GleasonScore_before + Albumin + Lymphocyte + CRP + NLR + CallyIndex + ComorbidityScore + Treatment, data = data, family = binomial, na.action = na.omit)
 
+```
+
+```{r, include=FALSE}
+
 summary(bcr_model)
+
+```
+
+```{r, echo=FALSE}
 
 plot(bcr_model, which = 1)
 
 ```
+
 The multivariate model reveals that PSA_before is statistically significant, suggesting that higher PSA at diagnosis is associated with increased odds of biochemical recurrence. This aligns with earlier visual patterns showing PSA as a key indicator of disease burden and risk. The model also shows that Treatment 3 (hormone therapy) is statistically significant compared with Treatment 1 (surgery as the reference group). This indicates that, after controlling for other predictors, patients receiving hormone therapy demonstrate higher recurrence risk relative to surgery. The coefficients for GleasonScore_before 4+3 and 5+5 were undefined due to singularities.
 
 ```{r, echo=FALSE}
 
 bcr_model <- glm(BCR ~ PSA_before + Treatment, data = data, family = binomial, na.action = na.omit)
 
+```
+
+```{r, include=FALSE}
+
 summary(bcr_model)
+
+```
+
+```{r, echo=FALSE}
 
 plot(bcr_model, which = 1)
 
@@ -681,7 +698,15 @@ A logistic regression approach was used to evaluate survival outcomes across tre
 
 survival_model <- glm(Survival ~ Age + PSA_before + CTstage + GleasonScore_before + Albumin + Lymphocyte + CRP + NLR + CallyIndex + ComorbidityScore + Treatment, data = data, family = binomial, na.action = na.omit)
 
+```
+
+```{r, include=FALSE}
+
 summary(survival_model)
+
+```
+
+```{r, echo=FALSE}
 
 plot(survival_model, which= 2)
 
@@ -691,11 +716,20 @@ plot(survival_model, which= 2)
 
 survival_model <- glm(Survival ~ Treatment, data = data, family = binomial, na.action = na.omit)
 
+```
+
+```{r, include=FALSE}
+
 summary(survival_model)
+
+```
+
+```{r, echo=FALSE}
 
 plot(survival_model, which = 2)
 
 ```
+
 We performed a similar logistic regression analysis to predict patient survival. Although the initial model suggested potential significance for Lymphocyte count and Treatment 4, the diagnostic plots reveal substantial issues with the model fit. The Q-Q plot of the residuals shows a stepped pattern that deviates significantly from the theoretical diagonal line. This indicates that the residuals do not follow the expected distribution. Consequently, this specific model appears unreliable for drawing conclusions about survival factors in this dataset.
 
 ## Model Interpretation 1: Logistic Regression (BCR ~ Treatment)
@@ -706,9 +740,14 @@ data$Treatment <- relevel(data$Treatment, ref = 3)
 
 bcr_model_t3 <- glm(BCR ~ PSA_before + Treatment, data = data, family = binomial, na.action = na.omit)
 
+```
+
+```{r, include=FALSE}
+
 summary(bcr_model_t3)
 
 ```
+
 Given the significance of Treatment 3 in our previous BCR model, we re-leveled the Treatment factor to set Treatment 3 as the reference group. This allows for a direct comparison against the other treatment types. The analysis confirms a significant difference between Treatment 1 and Treatment 3. Calculating the odds ratio from the model coefficients reveals that patients receiving Treatment 3 have approximately 1.93 times higher odds of experiencing biochemical recurrence compared to those receiving Treatment 1, holding PSA levels constant
 
 ## Model Interpretation 2: Logistic Regression (BCR ~ Combination)
@@ -719,6 +758,10 @@ data$Combination <- ifelse(data$Treatment == 4, "Yes", "No")
 data$Combination <- as.factor(data$Combination)
 
 bcr_model_2 <- glm(BCR ~ PSA_before + Combination, data = data,family = binomial, na.action = na.omit)
+
+```
+
+```{r, include=FALSE}
 
 summary(bcr_model_2)
 
@@ -754,16 +797,44 @@ test_probabilities <- predict(bcr_model_train, newdata = test_set, type = "respo
 
 ```
 
+Finally, we evaluated the predictive performance of the reduced BCR model. The data was split into a 70% training set and a 30% testing set, with oversampling applied to the training data to handle class imbalance.
+
 
 ### Evaluating: AUC (Area Under the Curve)
 
 ```{r, echo=FALSE}
 
+train_probabilities <- predict(bcr_model_train, newdata = train_set, type = "response")
+
+# Train AUC
+roc_obj_train <- roc(train_set$BCR, train_probabilities)
+auc_score_train <- auc(roc_obj_train)
+cat(sprintf("AUC (Area Under the Curve, Train Set): %.4f\n", auc_score_train))
+
+# Test AUC
 roc_obj <- roc(test_set$BCR, test_probabilities)
 auc_score <- auc(roc_obj)
 cat(sprintf("AUC (Area Under the Curve): %.4f\n", auc_score))
 
+par(mfrow = c(1, 2))
+
+# Train ROC
+plot(roc_obj_train, 
+     main = "ROC Curve for Training Set (Oversampling)",
+     xlab = "False Positive Rate (1 - Specificity)", 
+     ylab = "True Positive Rate (Sensitivity)",
+     lwd = 3)
+
+# Test ROC
+plot(roc_obj, 
+     main = "ROC Curve for BCR Prediction Model (Oversampling)",
+     xlab = "False Positive Rate (1 - Specificity)", 
+     ylab = "True Positive Rate (Sensitivity)",
+     lwd = 3)
+
 ```
+
+Upon testing the model on the unseen data, the Area Under the Curve (AUC) was calculated to be 0.5685, indicating that the model's predictive capability is only slightly better than random chance.
 
 ### Confusion Matrix (Threshold 0.5)
 
@@ -811,8 +882,10 @@ metrics_df %>%
   )
 
 ```
-Finally, we evaluated the predictive performance of the reduced BCR model. The data was split into a 70% training set and a 30% testing set, with oversampling applied to the training data to handle class imbalance. Upon testing the model on the unseen data, the Area Under the Curve (AUC) was calculated to be 0.5685, indicating that the model's predictive capability is only slightly better than random chance. The confusion matrix yields an overall accuracy of 56.11%. With a sensitivity of 52.73% and a specificity of 57.60%, the model struggles to reliably classify positive BCR cases, suggesting that while PSA and Treatment are significant risk factors, they are not sufficient on their own to form a high-precision predictive tool.
-  
+
+The confusion matrix yields an overall accuracy of 56.11%. With a sensitivity of 52.73% and a specificity of 57.60%, the model struggles to reliably classify positive BCR cases, suggesting that while PSA and Treatment are significant risk factors, they are not sufficient on their own to form a high-precision predictive tool.
+
+
 ### 5) Conclusion: 
 
 This project compared four primary prostate cancer treatment, Surgery(1), Radiotherapy(2), Hormone Therapy(3), and Combination Therapy (Hormone +Radiation). The main focus was to determine which treatment type appears the best across post-treatment outcomes. Our analyses focused on biochemical recurrence, PSA-based response patterns, and survival-related modeling, supported by both visual and inferential methods. The most consistent finding across tests and modeling is that treatment type is statistically associated with biochemical recurrence. The significant Chi-squared test supports the visual differences in recurrence rates across treatments, and the logistic regression confirms that these differences persist even after accounting for clinical severity. In particular, higher PSA at diagnosis increases recurrence risk, and Treatment 3 is associated with higher recurrence odds relative to Treatment 1. The reduced BCR model provides a more efficient explanation of recurrence patterns than the full model, supported by the substantial AIC improvement (765.93 → 732.69) and cleaner residual behavior. In contrast, survival differences are less stable in this dataset. While exploratory results suggested that Treatment 4 and Lymphocyte count may relate to survival, diagnostic issues—particularly the stepped deviation in the Q-Q plot—indicate that the survival model is not reliable enough to support strong treatment conclusions. This outcome emphasizes the importance of diagnostic checks and suggests that survival may require either additional predictors, a larger follow-up window, or a larger sample to model effectively. The combination-therapy comparison for BCR suggests that Treatment 4 does not show an inherent recurrence advantage over other treatments in this dataset (p = 0.94). This finding may reflect treatment selection patterns and baseline differences across groups, supported by the ANOVA result showing that baseline PSA significantly differs by treatment type.Based on recurrence-focused evidence, surgery (Treatment 1) appears to be the most favorable option for minimizing BCR in this dataset, while hormone monotherapy (Treatment 3) appears less favorable for recurrence prevention. However, because baseline PSA differs across treatment groups, as well as hormone therapy is more commonly asisgned to pateints with worse risks. Overall, these conclusions are not definitive in regards to overall best treatment for patients but it gives insight that surgery is likely the most beneficial to reduce likelihood of cancer returning to a patient .
