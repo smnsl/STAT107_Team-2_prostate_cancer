@@ -355,7 +355,7 @@ Figure 3 displays the distributions and central tendencies of Prostate-Specific 
 
 ### 4) Analysis 
 
-## PART A) TEST
+### PART A) TEST
   
 ### 4A-1) Chi-squared Test on Treatment vs. BCR
 
@@ -600,9 +600,9 @@ points(means, pch = 8, col = "black", cex = 1.5)
 ```
 The box plot visually confirms these findings: the PSA distribution for the Radical Prostatectomy (RP) group is noticeably lower than that of all other groups, and its mean value (often marked by a symbol) is the lowest. Conversely, the distribution and mean value for the Hormone Monotherapy (ADT) group are distinctly higher than those for the RP group, visually confirming that patients selected for RP had the lowest initial PSA levels at diagnosis. This showcases how treatment choice is infleunced by intial disease severity, and the best treatemnt can be determined through multivaraite models.
 
-## PART B) MODELING
+### PART B) MODELING
 
-## Data Analysis 0: Correlation between Variables
+### 4B-0) Correlation between Variables
 
 A Scatterplot Matrix was generated to visually confirm the correlation between clincal and biological variables. This visualization shows the relationship between each pair of variables and the distribution of each variable. Which will detect potential multicollinearity between variables before fitting the regression models.
 
@@ -645,7 +645,7 @@ ggpairs(
 
 
 
-## Data Analysis 1: Logistic Regression (BCR)
+### 4B-1) Logistic Regression (BCR)
 
 To evaluate which treatment type appears best for preventing biochemical recurrence, a logistic regression model was constructed with BCR as the dependent variable and clinical and biological variables as independent variables. BCR is a binary outcome (recurrence vs. no recurrence), logistic regression is an appropriate method for comparing the odds of recurrence across treatment groups while controlling for baseline disease severity and patient health factors. The full multivariate model included treatment type, baseline PSA, clinical stage, biopsy Gleason score, age, inflammatory markers, and comorbidity score.
 
@@ -689,7 +689,7 @@ plot(bcr_model, which = 1)
 
 The Residuals vs Fitted plot does not show the ideal random scatter around zero and instead shows two distinct linear patterns. While this pattern can occur in logistic regression diagnostics, it suggests the full model may be over-parameterized for the amount of signal in the data. This supports simplifying the model for clearer inference and better efficiency.
 
-## Data Analysis 2: Logistic Regression (Survival)
+### 4B-2) Logistic Regression (Survival)
 
 A logistic regression approach was used to evaluate survival outcomes across treatment types while accounting for clinical covariates.
 
@@ -731,7 +731,7 @@ plot(survival_model, which = 2)
 
 We performed a similar logistic regression analysis to predict patient survival. Although the initial model suggested potential significance for Lymphocyte count and Treatment 4, the diagnostic plots reveal substantial issues with the model fit. The Q-Q plot of the residuals shows a stepped pattern that deviates significantly from the theoretical diagonal line. This indicates that the residuals do not follow the expected distribution. Consequently, this specific model appears unreliable for drawing conclusions about survival factors in this dataset.
 
-## Model Interpretation 1: Logistic Regression (BCR ~ Treatment)
+### 4B-3) Model Interpretation 1: Logistic Regression (BCR ~ Treatment)
 
 ```{r, echo=FALSE}
 
@@ -749,7 +749,7 @@ summary(bcr_model_t3)
 
 Given the significance of Treatment 3 in our previous BCR model, we re-leveled the Treatment factor to set Treatment 3 as the reference group. This allows for a direct comparison against the other treatment types. The analysis confirms a significant difference between Treatment 1 and Treatment 3. Calculating the odds ratio from the model coefficients reveals that patients receiving Treatment 3 have approximately 1.93 times higher odds of experiencing biochemical recurrence compared to those receiving Treatment 1, holding PSA levels constant
 
-## Model Interpretation 2: Logistic Regression (BCR ~ Combination)
+### 4B-3) Model Interpretation 2: Logistic Regression (BCR ~ Combination)
 
 ```{r, echo=FALSE}
 
@@ -768,7 +768,7 @@ summary(bcr_model_2)
 We also investigated whether using a combination therapy (Treatment 4) provides a distinct advantage regarding BCR risk. By creating a binary variable to compare the combination therapy against all other treatments, we found that the coefficient for the combination group is not statistically significant (p = 0.94). This result implies that, in this dataset, simply combining treatments does not inherently result in a better outcome regarding biochemical recurrence compared to single-mode therapies.
 
 
-## Model Evaluation:
+### 4B-4) Model Evaluation
 
 ### Model Fitting and Predicting
 
@@ -811,8 +811,23 @@ auc_score_train <- auc(roc_obj_train)
 roc_obj <- roc(test_set$BCR, test_probabilities)
 auc_score <- auc(roc_obj)
 
+par(mfrow = c(1, 2))
+
+plot(roc_obj_train, 
+     main = "ROC Curve for Training Set",
+     xlab = "False Positive Rate (1 - Specificity)", 
+     ylab = "True Positive Rate (Sensitivity)",
+     lwd = 3)
+
+
+plot(roc_obj, 
+     main = "ROC Curve for BCR Prediction Model",
+     xlab = "False Positive Rate (1 - Specificity)", 
+     ylab = "True Positive Rate (Sensitivity)",
+     lwd = 3)
+
 auc_results <- data.frame(
-  Dataset = c("Training Set (Oversampled)", "Test Set"),
+  Dataset = c("Training Set", "Test Set"),
   AUC = c(
     sprintf("%.4f", auc_score_train), 
     sprintf("%.4f", auc_score)
@@ -826,25 +841,10 @@ auc_results %>%
     align = c('l', 'r') 
   )
 
-
-par(mfrow = c(1, 2))
-
-plot(roc_obj_train, 
-     main = "ROC Curve for Training Set (Oversampling)",
-     xlab = "False Positive Rate (1 - Specificity)", 
-     ylab = "True Positive Rate (Sensitivity)",
-     lwd = 3)
-
-
-plot(roc_obj, 
-     main = "ROC Curve for BCR Prediction Model (Oversampling)",
-     xlab = "False Positive Rate (1 - Specificity)", 
-     ylab = "True Positive Rate (Sensitivity)",
-     lwd = 3)
-
 ```
 
-Upon testing the model on the unseen data, the Area Under the Curve (AUC) was calculated to be 0.5685, indicating that the model's predictive capability is only slightly better than random chance.
+First, we plotted the ROC curve and calculated the AUC value to check the overall classification performance. The analysis showed that the AUC for the training set was 0.6229, but the AUC value for the test set, which is the actual target of evaluation, was confirmed to be 0.5685. This indicates that the model's predictive power is only slightly better than a random guess of 0.5, and the ROC curve is formed close to the diagonal line, visually demonstrating that the model's discrimination is not high. To determine specific classification accuracy, we generated a confusion matrix based on a threshold of 0.5 and calculated detailed metrics.
+
 
 ### Confusion Matrix (Threshold 0.5)
 
@@ -875,7 +875,7 @@ conf_df %>%
   )
 
 metrics_df <- data.frame(
-  Metric = c("Accuracy", "Sensitivity (Recall)", "Specificity"),
+  Metric = c("Accuracy", "Sensitivity", "Specificity"),
   Value = c(accuracy, sensitivity, specificity)
 ) %>%
   mutate(Value = sprintf("%.4f", Value))
@@ -893,7 +893,7 @@ metrics_df %>%
 
 ```
 
-The confusion matrix yields an overall accuracy of 56.11%. With a sensitivity of 52.73% and a specificity of 57.60%, the model struggles to reliably classify positive BCR cases, suggesting that while PSA and Treatment are significant risk factors, they are not sufficient on their own to form a high-precision predictive tool.
+Based on the confusion matrix, the overall accuracy of the model is calculated to be approximately 56.11%. Sensitivity, which is the proportion of actual recurrence patients correctly predicted as such, was only 52.73%, and specificity, which classifies non-recurrence patients, was found to be 57.60%. Looking at the confusion matrix, we can see that out of 82 actual True cases, only 29 were correctly predicted. These results suggest that although pre-operative PSA levels and treatment methods are statistically significant variables, these two variables alone have limitations in predicting biochemical recurrence for individual patients with high accuracy.
 
 
 ### 5) Conclusion: 
