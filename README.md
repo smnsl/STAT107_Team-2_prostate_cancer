@@ -16,17 +16,29 @@ STEP-BY-STEP PROCESS
 - Required software: R & RStudio
 
   1.) Place all the provided files, including data file (00_ProstateCancer_Data),  required packages (00_requirements), functions (01_Functions), and R Markdown files (11_..., 12_..., 13_...) in a single directory/file.
+
   2.) Open the file 00_requirements.R in RStudio and run the entire script
+
       i. This script automatically checks for and installs all necessary R packages and loads them into your R environment.
+
+
   3.) First step in the analysis is cleaning and preparing the data for future steps of this project, and this is outlined in 11_PRostateCancer_DataProcessing.Rmd.
+
+
       i. Open 11_PRostateCancer_DataProcessing.Rmd file
       ii. When you execute all code chunks inside this file, it will automatically clean, rename, and convert the necessary variables
       iii. It will also perform the initial Exploratory Data Analysis to generate various visualizations of key clinical and risk   factors. 
+
+
   4.) Next step is to perform initial statistical tests with cleaned data from step 3.
+
       i. Open 12_ProstateCancer_DataAnalysis_Test.Rmd
       ii. When you execute all code chunks inside this file, it will perform Chi-squared tests to assess the association between Treatment Type & outcomes such as Biochemical Recurrence (BCR) and Survival Status
       iii. It will also execute an ANOVA test to determine if PSA at diagnosis significantly differs across the 4 Treatment Type, folllowing with Tukey's HSD for pairwise comparison.
+
+
   5.) For complex analysis, we'll utilize logistic regression and model validation.
+
       i. Open 13_ProstateCancer_DataAnalysis_Regression.Rmd
       ii. When you execute all code chunks inside this file, it will
           a. provide multivariate logistic regression models for both BCR & Survival
