@@ -819,9 +819,8 @@ plot(roc_obj_train,
      ylab = "True Positive Rate (Sensitivity)",
      lwd = 3)
 
-
 plot(roc_obj, 
-     main = "ROC Curve for BCR Prediction Model",
+     main = "ROC Curve for BCR Test Model",
      xlab = "False Positive Rate (1 - Specificity)", 
      ylab = "True Positive Rate (Sensitivity)",
      lwd = 3)
@@ -902,4 +901,11 @@ This project compared four primary prostate cancer treatment, Surgery(1), Radiot
 
 
 ### Work Cited (Used in Abstract)
+
 Rawla P. (2019). Epidemiology of Prostate Cancer. World journal of oncology, 10(2), 63–89. https://doi.org/10.14740/wjon1191
+
+
+### GitHub repository
+
+https://github.com/smnsl/STAT107_Team-2_prostate_cancer
+
