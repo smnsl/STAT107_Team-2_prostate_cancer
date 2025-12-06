@@ -775,16 +775,43 @@ test_predictions <- ifelse(test_probabilities > 0.5, "True", "False")
 conf_matrix <- table(Predicted = test_predictions, Actual = test_set$BCR)
 conf_matrix <- conf_matrix[, c("False", "True")]
 
-cat("Confusion Matrix (Threshold 0.5):\n")
-print(conf_matrix)
-
 accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
 sensitivity <- conf_matrix["True", "True"] / sum(conf_matrix[, "True"])
 specificity <- conf_matrix["False", "False"] / sum(conf_matrix[, "False"])
 
-cat(sprintf("   Accuracy: %.4f\n", accuracy))
-cat(sprintf("   Sensitivity: %.4f\n", sensitivity))
-cat(sprintf("   Specificity: %.4f\n", specificity))
+conf_df <- as.data.frame.matrix(conf_matrix)
+conf_df <- tibble::rownames_to_column(conf_df, var = "Predicted") %>%
+  rename(`Actual (BCR=False)` = False, `Actual (BCR=True)` = True)
+
+conf_df %>%
+  kable(
+    caption = "Confusion Matrix (Threshold 0.5)",
+    col.names = c("Predicted", "False", "True"),
+    booktabs = TRUE,
+    align = 'c'
+  ) %>%
+  add_header_above(c(" " = 1, "Actual Status" = 2)) %>%
+  kable_styling(
+    latex_options = c("hold_position"), 
+    full_width = FALSE
+  )
+
+metrics_df <- data.frame(
+  Metric = c("Accuracy", "Sensitivity (Recall)", "Specificity"),
+  Value = c(accuracy, sensitivity, specificity)
+) %>%
+  mutate(Value = sprintf("%.4f", Value))
+
+metrics_df %>%
+  kable(
+    caption = "Performance Metrics (Threshold 0.5)",
+    booktabs = TRUE,
+    align = c('l', 'c')
+  ) %>%
+  kable_styling(
+    latex_options = c("hold_position"), 
+    full_width = FALSE
+  )
 
 ```
 Finally, we evaluated the predictive performance of the reduced BCR model. The data was split into a 70% training set and a 30% testing set, with oversampling applied to the training data to handle class imbalance. Upon testing the model on the unseen data, the Area Under the Curve (AUC) was calculated to be 0.5685, indicating that the model's predictive capability is only slightly better than random chance. The confusion matrix yields an overall accuracy of 56.11%. With a sensitivity of 52.73% and a specificity of 57.60%, the model struggles to reliably classify positive BCR cases, suggesting that while PSA and Treatment are significant risk factors, they are not sufficient on their own to form a high-precision predictive tool.
