@@ -1,4 +1,4 @@
-# STAT107-team2
+# STAT107_Team#2
 
 This repository contains all the necessary files for submissions. Below is a short description of each file.
 
