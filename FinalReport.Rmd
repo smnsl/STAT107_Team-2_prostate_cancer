@@ -394,8 +394,7 @@ names(df_final) <- c("Treatment Type",
                      "Recurrence (%) (True)")
 
 df_final %>%
-  kable(caption = "4.1 Association between Treatment Type and Biochemical Recurrence (BCR)", 
-        booktabs = TRUE,
+  kable(booktabs = TRUE,
         linesep = "",
         align = c('l', 'c', 'c', 'c', 'c')) %>% 
   kable_styling(latex_options = "hold_position") %>%
@@ -477,8 +476,7 @@ names(df_final_s) <- c("Treatment Type",
                      "Mortality (%) (Deceased)")
 
 df_final_s %>%
-  kable(caption = "Table 4.2: Association between Treatment Type and Survival Status", 
-        booktabs = TRUE,
+  kable(booktabs = TRUE,
         linesep = "",
         col.names = c("Treatment Type", 
                       "Count (Alive)", "Count (Deceased)", 
@@ -543,8 +541,7 @@ mean_psa_df <- data.frame(
 )
 
 mean_psa_df %>%
-  kable(caption = "Table 4.4: Mean PSA Reduction (Delta PSA) by Treatment Type", 
-    booktabs = TRUE,
+  kable(booktabs = TRUE,
     linesep = "",
     col.names = c("Treatment Type",
     "Mean Reduction (PSA_before - PSA_after)"),
@@ -653,7 +650,7 @@ ggpairs(
 
 To evaluate which treatment type appears best for preventing biochemical recurrence, a logistic regression model was constructed with BCR as the dependent variable and clinical and biological variables as independent variables. BCR is a binary outcome (recurrence vs. no recurrence), logistic regression is an appropriate method for comparing the odds of recurrence across treatment groups while controlling for baseline disease severity and patient health factors. The full multivariate model included treatment type, baseline PSA, clinical stage, biopsy Gleason score, age, inflammatory markers, and comorbidity score.
 
-```{r}
+```{r, echo=FALSE}
 
 bcr_model <- glm(BCR ~ Age + PSA_before + CTstage + GleasonScore_before + Albumin + Lymphocyte + CRP + NLR + CallyIndex + ComorbidityScore + Treatment, data = data, family = binomial, na.action = na.omit)
 
@@ -664,7 +661,7 @@ plot(bcr_model, which = 1)
 ```
 The multivariate model reveals that PSA_before is statistically significant, suggesting that higher PSA at diagnosis is associated with increased odds of biochemical recurrence. This aligns with earlier visual patterns showing PSA as a key indicator of disease burden and risk. The model also shows that Treatment 3 (hormone therapy) is statistically significant compared with Treatment 1 (surgery as the reference group). This indicates that, after controlling for other predictors, patients receiving hormone therapy demonstrate higher recurrence risk relative to surgery. The coefficients for GleasonScore_before 4+3 and 5+5 were undefined due to singularities.
 
-```{r}
+```{r, echo=FALSE}
 
 bcr_model <- glm(BCR ~ PSA_before + Treatment, data = data, family = binomial, na.action = na.omit)
 
@@ -680,7 +677,7 @@ The Residuals vs Fitted plot does not show the ideal random scatter around zero 
 
 A logistic regression approach was used to evaluate survival outcomes across treatment types while accounting for clinical covariates.
 
-```{r}
+```{r, echo=FALSE}
 
 survival_model <- glm(Survival ~ Age + PSA_before + CTstage + GleasonScore_before + Albumin + Lymphocyte + CRP + NLR + CallyIndex + ComorbidityScore + Treatment, data = data, family = binomial, na.action = na.omit)
 
@@ -690,7 +687,7 @@ plot(survival_model, which= 2)
 
 ```
 
-```{r}
+```{r, echo=FALSE}
 
 survival_model <- glm(Survival ~ Treatment, data = data, family = binomial, na.action = na.omit)
 

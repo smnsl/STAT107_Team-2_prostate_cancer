@@ -18,6 +18,11 @@ if (!require(GGally)) {
   library(GGally)            
 }
 
+#modelsummary
+if (!require(modelsummary)) {      
+  install.packages("modelsummary") 
+  library(modelsummary)            
+}
 
 # knitr
 if (!require(knitr)) {
