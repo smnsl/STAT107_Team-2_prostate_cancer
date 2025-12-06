@@ -11,6 +11,7 @@ FILE DESCRIPTION:
 - 13_ProstateCancer_DataAnalysis_Regression: Shows moore advanced statistical analysis with modeling, using multivariate logistic regression to identify factors predicting Biochemical Recurrence (BCR) and Survival of prostate cancer patients. It also includes data balancing and calculating metrics AUC, accuracy, and sensitivity. 
 - Final Report: Written with title and brief abstract, introduction, data, visualization, and analysis for our project. 
 (NO LONGER IN REPOSITORY SINCE IT IS NOT A REQUIRED FOR THE FINAL SUBMISSION: Team_Member_Evaluation: Summarization of each member's contribution on this project.)
+- Team_Member_Evaluation: Summarization of each member's contribution on this project. 
 
 STEP-BY-STEP PROCESS
 - Required software: R & RStudio
