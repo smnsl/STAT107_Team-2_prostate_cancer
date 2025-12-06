@@ -136,7 +136,7 @@ summary(bcr_model_2)
 
 ### Model Fitting and Predicting
 
-```{r}
+```{r, echo=FALSE}
 
 vars_for_model <- c("BCR", "PSA_before", "Treatment")
 model_data <- data[complete.cases(data[, vars_for_model]), vars_for_model]
@@ -163,13 +163,38 @@ test_probabilities <- predict(bcr_model_train, newdata = test_set, type = "respo
 
 ### Evaluating: AUC (Area Under the Curve)
 
-```{r}
+```{r, echo=FALSE}
 
+train_probabilities <- predict(bcr_model_train, newdata = train_set, type = "response")
+
+# Train AUC
+roc_obj_train <- roc(train_set$BCR, train_probabilities)
+auc_score_train <- auc(roc_obj_train)
+cat(sprintf("AUC (Area Under the Curve, Train Set): %.4f\n", auc_score_train))
+
+# Test AUC
 roc_obj <- roc(test_set$BCR, test_probabilities)
 auc_score <- auc(roc_obj)
 cat(sprintf("AUC (Area Under the Curve): %.4f\n", auc_score))
 
+par(mfrow = c(1, 2))
+
+# Train ROC
+plot(roc_obj_train, 
+     main = "ROC Curve for Training Set (Oversampling)",
+     xlab = "False Positive Rate (1 - Specificity)", 
+     ylab = "True Positive Rate (Sensitivity)",
+     lwd = 3)
+
+# Test ROC
+plot(roc_obj, 
+     main = "ROC Curve for BCR Prediction Model (Oversampling)",
+     xlab = "False Positive Rate (1 - Specificity)", 
+     ylab = "True Positive Rate (Sensitivity)",
+     lwd = 3)
+
 ```
+
 
 ### Confusion Matrix (Threshold 0.5)
 
